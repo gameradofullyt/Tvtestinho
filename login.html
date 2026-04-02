@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Cadastro | GAMERADOFLIX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --dark: #040D12; --red: #C63C51; --light: #f3f3f3; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('https://image.tmdb.org/t/p/original/mDeUmG9ca0p2uY686p799986as3.jpg');
+            background-size: cover; background-position: center;
+            height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0;
+        }
+        .auth-card {
+            background: rgba(4, 13, 18, 0.95);
+            padding: 50px; border-radius: 15px; width: 90%; max-width: 420px;
+            text-align: center; border-top: 4px solid var(--red);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+        h2 { color: var(--light); margin-bottom: 25px; font-weight: 700; }
+        .input-box { margin-bottom: 20px; text-align: left; }
+        .input-box label { color: var(--light); font-size: 0.8rem; display: block; margin-bottom: 8px; }
+        .input-box input {
+            width: 100%; padding: 12px; border-radius: 5px; border: 1px solid #333;
+            background: #111; color: white; outline: none;
+        }
+        .input-box input:focus { border-color: var(--red); }
+        .btn-submit {
+            width: 100%; padding: 14px; background: var(--red); border: none;
+            color: white; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.3s;
+        }
+        .btn-submit:hover { background: #a32f41; }
+        .guest-link { display: block; margin-top: 20px; color: #aaa; text-decoration: none; font-size: 0.9rem; }
+        .guest-link:hover { color: var(--light); text-decoration: underline; }
+        .switch-form { margin-top: 25px; color: #888; font-size: 0.85rem; }
+        .switch-form span { color: var(--red); cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <h2 id="formTitle">Entrar</h2>
+        <form action="index.html">
+            <div class="input-box" id="nameField" style="display: none;">
+                <label>Nome Completo</label>
+                <input type="text" placeholder="Seu nome">
+            </div>
+            <div class="input-box">
+                <label>E-mail</label>
+                <input type="email" placeholder="email@exemplo.com" required>
+            </div>
+            <div class="input-box">
+                <label>Senha</label>
+                <input type="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-submit" id="btnText">Entrar</button>
+        </form>
+        
+        <a href="index.html" class="guest-link">Entrar como Convidado</a>
+        
+        <p class="switch-form" id="switchText">Novo no GAMERADOFLIX? <span onclick="toggleForm()">Cadastre-se agora.</span></p>
+    </div>
+
+    <script>
+        function toggleForm() {
+            const title = document.getElementById('formTitle');
+            const btn = document.getElementById('btnText');
+            const nameField = document.getElementById('nameField');
+            const switchText = document.getElementById('switchText');
+
+            if (title.innerText === 'Entrar') {
+                title.innerText = 'Cadastrar';
+                btn.innerText = 'Criar Conta';
+                nameField.style.display = 'block';
+                switchText.innerHTML = 'Já tem uma conta? <span onclick="toggleForm()">Faça login.</span>';
+            } else {
+                title.innerText = 'Entrar';
+                btn.innerText = 'Entrar';
+                nameField.style.display = 'none';
+                switchText.innerHTML = 'Novo no GAMERADOFLIX? <span onclick="toggleForm()">Cadastre-se agora.</span>';
+            }
+        }
+    </script>
+</body>
+</html>

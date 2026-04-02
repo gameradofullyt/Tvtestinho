@@ -1,0 +1,587 @@
+:root {
+    --bg-color: #040D12;
+    --text-color: #f3f3f3;
+    --primary-red: #C63C51;
+    --nav-bg: #040D12;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Poppins', sans-serif; background: var(--bg-color); color: var(--text-color); overflow-x: hidden; }
+
+/* NAVBAR */
+.navbar { position: absolute; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; background: var(--nav-bg); z-index: 1000; border-bottom: 2px solid var(--primary-red); }
+.logo { color: var(--primary-red); font-weight: 700; font-size: 1.8rem; }
+.nav-links { display: flex; list-style: none; }
+.nav-links li a { color: var(--text-color); text-decoration: none; margin: 0 15px; transition: 0.3s; }
+.nav-links li a:hover { color: var(--primary-red); }
+
+/* DROPDOWN */
+.dropdown { position: relative; }
+.dropdown-content { display: none; position: absolute; background: #111; min-width: 180px; border: 1px solid var(--primary-red); top: 100%; border-radius: 5px; }
+.dropdown:hover .dropdown-content { display: block; }
+.dropdown-content a { color: white; padding: 12px; text-decoration: none; display: block; }
+.dropdown-content a:hover { background: var(--primary-red); }
+
+/* CARROSSEL PRINCIPAL */
+.carousel-container { position: relative; height: 75vh; margin-top: 70px; overflow: hidden; }
+.carousel-item { display: none; height: 100%; background-size: cover; background-position: center; align-items: center; padding: 0 8%; }
+.carousel-item.active { display: flex; animation: fade 0.5s; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.play-btn { background: var(--primary-red); color: white; border: none; padding: 12px 30px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+/* SLIDER DE CATEGORIAS (O SEGREDO DO MOVIMENTO) */
+.category-slider { margin: 40px 5%; position: relative; }
+.slider-wrapper { position: relative; display: flex; align-items: center; }
+.slider-track { 
+    display: flex; 
+    overflow-x: hidden; 
+    scroll-behavior: smooth; 
+    gap: 20px; 
+    padding: 15px 0; 
+}
+.card { 
+    min-width: 200px; 
+    background: #111; 
+    border-radius: 10px; 
+    transition: 0.3s; 
+    cursor: pointer; 
+    flex: 0 0 auto; 
+}
+.card:hover { transform: scale(1.05); border: 1px solid var(--primary-red); }
+.card img { width: 100%; height: 280px; border-radius: 10px 10px 0 0; object-fit: cover; }
+.card-info { padding: 10px; text-align: center; }
+
+/* SETAS DOS SLIDERS */
+.slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.8);
+    color: white;
+    border: 2px solid var(--primary-red);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    font-size: 1.2rem;
+}
+.slider-arrow.prev { left: -20px; }
+.slider-arrow.next { right: -20px; }
+.slider-arrow:hover { background: var(--primary-red); }
+
+.category-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.category-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
+.netflix-style {
+    position: relative;
+    padding-left: 10px;
+}
+
+.category-slider:first-of-type {
+    margin-top: 80px;
+}
+
+body {
+    margin: 0;
+    background: #0b0b0b;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.titulo {
+    padding: 20px;
+}
+
+.grid-filmes {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+    padding: 20px;
+}
+
+.filme img {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.filme h4 {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* RESPONSIVO */
+@media (max-width: 1200px) {
+    .grid-filmes { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 900px) {
+    .grid-filmes { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 600px) {
+    .grid-filmes { grid-template-columns: repeat(2, 1fr); }
+}
+
+.slider-track {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+}
+
+.slider-track::-webkit-scrollbar {
+    display: none;
+}
+
+.category-divider {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 40px 0 20px;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.category-divider::before,
+.category-divider::after {
+    content: "";
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #e50914);
+}
+
+.category-divider::after {
+    background: linear-gradient(to left, transparent, #e50914);
+}
+
+.category-divider span {
+    padding: 0 16px;
+    white-space: nowrap;
+}
+
+.rgb-outline {
+    position: relative;
+    color: #fff;
+    font-weight: 600;
+    -webkit-text-stroke: 1.5px transparent;
+    background: linear-gradient(
+        90deg,
+        #ff004c,
+        #ff9900,
+        #ffee00,
+        #33ff00,
+        #00ffee,
+        #0066ff,
+        #cc00ff,
+        #ff004c
+    );
+    background-size: 400% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: rgbStroke 6s linear infinite;
+}
+
+/* garante texto branco preenchido */
+.rgb-outline {
+    -webkit-text-fill-color: white;
+}
+@keyframes rgbStroke {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 400% 50%; }
+}
+
+.card {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+/* contorno */
+.card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(
+        120deg,
+        #5a0000,
+        #8b0000,
+        #b30000,
+        #7a0000,
+        #5a0000
+    );
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+/* efeito leve ao passar o mouse */
+.card:hover {
+    transform: scale(1.05);
+}
+
+.card {
+    position: relative;
+}
+
+.card img {
+    width: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.card-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(
+        to top,
+        rgba(0,0,0,0.8),
+        rgba(0,0,0,0)
+    );
+    color: #fff;
+}
+
+.card {
+    position: relative;
+}
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.ver-mais-btn {
+    color: #8b0000;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.ver-mais-btn:hover {
+    color: #ff2b2b;
+    background: rgba(139, 0, 0, 0.2);
+}
+.category-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 20px 10px 10px;
+}
+
+.ver-mais-btn {
+    background: #8b0000; /* vermelho escuro */
+    color: #ffffff;      /* texto branco */
+    padding: 8px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.ver-mais-btn:hover {
+    background: #b30000;
+    transform: scale(1.05);
+}
+.logo-rgb {
+  font-size: 2.6rem;
+  font-weight: 900;
+  color: #0b0b0b; /* preenchimento quase preto */
+  position: relative;
+
+  background: linear-gradient(
+    90deg,
+    #7a0000,   /* vermelho vinho */
+    #a30000,   /* vermelho escuro */
+    #c40000,   /* vermelho sangue */
+    #8b0000,   /* dark red */
+    #7a0000
+  );
+
+  background-size: 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  -webkit-text-stroke: 2px transparent;
+
+  animation: rgbSoft 6s linear infinite;
+}
+@keyframes rgbSoft {
+  0%   { background-position: 0%; }
+  100% { background-position: 300%; }
+}
+.logo-rgb {
+  -webkit-text-stroke: 1.4px transparent;
+}
+.logo-rgb {
+  text-shadow:
+    0 0 4px rgba(180, 0, 0, 0.4),
+    0 0 8px rgba(120, 0, 0, 0.25);
+}
+.category-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* CD girando */
+.icon-cd {
+    display: inline-block;
+    animation: spinCD 4s linear infinite;
+}
+
+@keyframes spinCD {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+.emoji-animado {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 8px;
+    animation: girarEmoji 3.5s linear infinite;
+    vertical-align: middle;
+}
+
+@keyframes girarEmoji {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+/* GERAL – garante que fique ao lado e alinhado */
+h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ===== 📀 CD GIRANDO ===== */
+.emoji-cd {
+    display: inline-block;
+    animation: girarCD 2s linear infinite;
+}
+
+@keyframes girarCD {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== 🎬 BATENDO (abre e fecha) ===== */
+.emoji-camera {
+    display: inline-block;
+    animation: baterCamera 1.5s ease-in-out infinite;
+    transform-origin: left center;
+}
+
+@keyframes baterCamera {
+    0% {
+        transform: rotate(0deg);
+    }
+    30% {
+        transform: rotate(-15deg);
+    }
+    60% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+/* ===== 📺 LIGANDO E DESLIGANDO ===== */
+.emoji-tv {
+    display: inline-block;
+    animation: ligarTV 2.5s ease-in-out infinite;
+}
+
+@keyframes ligarTV {
+    0% {
+        opacity: 0.3;
+        transform: scaleY(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+    70% {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+    100% {
+        opacity: 0.3;
+        transform: scaleY(0.8);
+    }
+}
+.emoji-claquete {
+    display: inline-block;
+    transform-origin: top center;
+    animation: claquete 1.4s ease-in-out infinite;
+}
+
+@keyframes claquete {
+    0% {
+        transform: rotate(0deg);
+    }
+    20% {
+        transform: rotate(-18deg);
+    }
+    40% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+.category-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* empurra o botão para o canto direito */
+.ver-mais-h2 {
+    margin-left: auto;
+    background: #8b0000; /* vermelho escuro */
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.ver-mais-h2:hover {
+    background: #b30000;
+    transform: scale(1.05);
+}
+/* ==========================================
+   BARRA DE PESQUISA E NOVAS TELAS
+========================================== */
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    margin-right: 30px;
+}
+
+.search-input {
+    width: 200px;
+    padding: 8px 15px 8px 35px;
+    border-radius: 20px;
+    border: 1px solid var(--primary-red);
+    background: #111;
+    color: white;
+    outline: none;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    width: 280px;
+    box-shadow: 0 0 10px rgba(198, 60, 81, 0.5);
+    background: #000;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    color: #888;
+    pointer-events: none;
+    font-size: 0.9rem;
+}
+
+/* Classe vital para esconder itens */
+.hidden-search {
+    display: none !important;
+}
+
+/* ==========================================
+   AJUSTES GERAIS E TELA DE PESQUISA
+========================================== */
+
+/* 1. Empurra o conteúdo principal pra baixo para não sumir atrás do Header */
+/* Empurra o conteúdo para não sumir atrás do Header, mas sem exagerar */
+.content {
+    padding-top: 100px; /* Reduzido (antes era 140px) */
+}
+
+/* Remove o espaço duplo do primeiro slider */
+.category-slider:first-of-type {
+    margin-top: 20px; 
+}
+
+.tela-pesquisa {
+    padding-top: 100px; /* Igual ao content */
+    /* ... mantenha o resto da tela pesquisa igual ... */
+}
+
+
+/* 2. TELA DE PESQUISA EM TEMPO REAL */
+.tela-pesquisa {
+    padding-top: 140px; /* Resolve o bug do título atrás do header vermelho */
+    min-height: 80vh;
+    padding-left: 5%;
+    padding-right: 5%;
+    padding-bottom: 20px;
+    animation: fade 0.3s ease-in-out;
+}
+
+/* CLASSE UTILITÁRIA GERAL PARA OCULTAR ELEMENTOS */
+.hidden {
+    display: none !important;
+}
+
+/* 3. Arruma os cards dentro da pesquisa para não ficarem espremidos no mobile */
+.tela-pesquisa .card {
+    min-width: 100%; /* Preenche o espaço todo da coluna no grid */
+    margin: 0;
+}
+
+.tela-pesquisa .card img {
+    height: auto; 
+    aspect-ratio: 2/3; /* Mantém a proporção perfeita de pôster de filme */
+}
+
+
+/* CLASSE UTILITÁRIA GERAL PARA OCULTAR ELEMENTOS */
+.hidden {
+    display: none !important;
+}

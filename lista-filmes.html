@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todos os Filmes | GAMERADOFLIX</title>
+    <style>
+        /* Estilos baseados no design do site */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0b0f19;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Barra de navegação do topo (Filtro e Pesquisa) */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #121622;
+            padding: 12px 15px;
+            font-size: 13px;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        /* Estilo do Select (Filtro) - Agora todo Vermelho Vinho */
+        .filter-select {
+            background-color: #8b1c31; /* Fundo vermelho vinho */
+            color: white;
+            border: none; /* Removendo a borda para um visual mais limpo */
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            outline: none;
+            transition: background-color 0.2s;
+        }
+        
+        .filter-select:hover {
+            background-color: #6a1324; /* Vinho mais escuro ao passar o mouse */
+        }
+
+        /* Estilo do submenu (opções) - Igual ao filtro */
+        .filter-select option {
+            background-color: #8b1c31; /* Fundo vermelho vinho nas opções */
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Estilo da Barra de Pesquisa */
+        .search-input {
+            background-color: #1c2130;
+            color: white;
+            border: 1px solid #2a3145;
+            padding: 8px 12px;
+            border-radius: 4px;
+            outline: none;
+            width: 150px;
+            transition: width 0.3s ease, border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            width: 200px;
+            border-color: #8b1c31; 
+        }
+
+        .search-input::placeholder {
+            color: #8c92a5;
+        }
+
+        .page-indicator {
+            color: #8c92a5;
+            font-size: 12px;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        /* Grade de 3 colunas e 10 fileiras */
+        .grid-filmes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: 50vh;
+        }
+
+        /* Estilo individual de cada card de filme */
+        .filme {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 2 / 3;
+            background-color: #1a1f2e;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .filme:hover {
+            transform: scale(1.03);
+        }
+
+        .filme img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Tags de DUB, HD, CAM */
+        .tags {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            display: flex;
+            gap: 4px;
+            z-index: 2;
+        }
+
+        .tag {
+            font-size: 9px;
+            font-weight: bold;
+            padding: 3px 5px;
+            border-radius: 3px;
+            letter-spacing: 0.5px;
+        }
+
+        .tag.dub { background-color: #1ba1e2; color: #fff; }
+        .tag.leg { background-color: #2d89ef; color: #fff; }
+        .tag.qual { background-color: #000; color: #fff; border: 1px solid #333; }
+
+        /* Informações na base do card */
+        .card-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 40px 10px 10px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 40%, transparent 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 1;
+        }
+
+        .card-info h4 {
+            margin: 0;
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 1.2;
+            color: #fff;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #aaa;
+        }
+
+        /* Paginação no final da página */
+        .bottom-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 15px 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Botões Vermelho Vinho */
+        .btn-wine {
+            background-color: #8b1c31; 
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+
+        .btn-wine:hover {
+            background-color: #6a1324; 
+        }
+
+        .btn-wine:disabled {
+            background-color: #3d1c23;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        /* Classe para esconder elementos via JS */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="top-bar">
+        <select class="filter-select" id="filter-select">
+            <option value="todos">Gêneros</option>
+            <option value="acao">Ação</option>
+            <option value="romance">Romance</option>
+            <option value="terror">Terror</option>
+            <option value="ficcao">Ficção</option>
+            <option value="comedia">Comédia</option>
+            <option value="luta">Luta</option>
+            <option value="drama">Drama</option>
+            <option value="animal">Animais</option>
+            <option value="crime">Crime</option>
+            <option value="kid">Infantil</option>
+            <option value="anime">Animes</option>
+            <option value="erotico">Erotico</option>
+        </select>
+        
+        <span class="page-indicator" id="page-info">Pág 1 de 1</span>
+        
+        <input type="text" id="search-input" class="search-input" placeholder="Pesquisar...">
+    </header>
+
+    <main class="content">
+        <div class="grid-filmes" id="lista-filmes">
+
+            <script>
+                for(let i = 1; i <= 1; i++) {
+                    let generoAleatorio = ['acao', 'terror', 'ficcao'][Math.floor(Math.random() * 3)];
+                    
+                    document.write(``);
+                }
+            </script>
+
+            <div class="filme"  data-genero="crime" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/tt1266027'">
+                <div class="tags"><span class="tag leg">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRAvcwPlrFO132trG7wCUGgwpVOTl9XrlEnztohv0BFFrj_biiZHfteA0zE&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Força Tática</h4>
+                    <div class="card-details"><span>2011</span><span>1h 31min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="lutta" onclick="window.location.href='player.html?title=Besouro&url=https://playerflixapi.com/filme/tt1322277'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3y-vxufWvzcVHOxz2z29kCryxN6guDUWUiANriN6Hr7VOYkuYdlypGeou8bmb-JU2OZWv&s" alt="Capa">
+                <div class="card-info">
+                    <h4>Besouro</h4>
+                    <div class="card-details"><span>2009</span><span>1h 35min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" data-genero="animais" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/spLJTEsaQwlkXdfwvzrZJvq9qAp.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Pânico no Lago 2</h4>
+                    <div class="card-details"><span>2007</span><span>1h 28min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1Fg2kThiuRSrGFeokAa0EXzxzgMH7bDkwj5i_1f2kVqALETPEPpbzlEeA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Godzilla Ressurge</h4>
+                    <div class="card-details"><span>2016</span><span>2h 00min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/6eGlig64s1MCv4GkaXeEDczEkRQ.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Busca Explosiva 2</h4>
+                    <div class="card-details"><span>2009</span><span>1h 35min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Tropa de Elite&url=https://myembed.biz/filme/tt0861739'">
+                <div class="tags"><span class="tag leg">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/atl4a9VFVP7JYvk4GeSgqhLOfjC.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Tropa de Elite</h4>
+                    <div class="card-details"><span>2007</span><span>1h 55min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTszeGlVzn6mrQkCzQdnO5pLW2Tg4g-Vn-6boe3zpmtCw&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Pânico no Lago 3</h4>
+                    <div class="card-details"><span>2010</span><span> 1h 36min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/iD2XVowFgHngYGamCAdq2T44gMr.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Tubarão</h4>
+                    <div class="card-details"><span>1975</span><span>2h 4min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/cdZInQF7FNhiA622Ut9PcOXMDiM.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Anaconda</h4>
+                    <div class="card-details"><span>1997</span><span>1h 29min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS20OlmsAGyA1UTRPEBZVKl76hpWVlHoZ0l2RL-vQjPgA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Punhos de Aço</h4>
+                    <div class="card-details"><span>2009</span><span>1h 42min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/wjxjRlttamOJdGIPOJxLEhtno9V.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Quem Somos Nós?</h4>
+                    <div class="card-details"><span>2004</span><span>1h 49min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" data-genero="romance" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/1a60KPNTC4JKYphNQveAB37Lyif.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Como Eu Era Antes de Voce</h4>
+                    <div class="card-details"><span>2016</span><span>1h 50min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="romance" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZAB-Qo12qgbJSAWz9LMNJR6jR0CEyYxelNLSsdQ-Wv-VTB-vtUaWGCs3p8RhYkNQvvhRayg&s" alt="Capa">
+                <div class="card-info">
+                    <h4>Como Se Fosse a Primeira Vez</h4>
+                    <div class="card-details"><span>2004</span><span>1h 39min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/9dyFXQwmFHI1gMn2JEczgKD1hwO.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Godzilla</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://play-lh.googleusercontent.com/8b0izQwxU79gMpvcdSHqjcYlAmaTXgTL-rXrijHkeYfYEnQbmdj0pKOOUj3mqc3u8eE" alt="Capa">
+                <div class="card-info">
+                    <h4>Pânico</h4>
+                    <div class="card-details"><span>1996</span><span>1h 50min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/wrJkShDPK4TcV0nHix3HASEmkul.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Megatubarão</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxeLLsedURckQe8s3nQcYQ7Ht_s1n9FrtI-jV0xWmEXw&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Premonição</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKEGXzV-NRtKG4ajQWBOhJ8mltJHLyvBTSHWJdwhEFzpQ1MOJtBp0rB6c&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Guerra Primitiva</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/bhOBPEmtPPfwfTIbCF5CPMeEte6.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Tubarão da Areia</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/q0aZsCojKifKEFWGnDf3jMbLUe3.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Megaterremoto</h4>
+                    <div class="card-details"><span>2016</span><span>120min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://upload.wikimedia.org/wikipedia/pt/thumb/8/85/Wrong_Turn_movie.jpg/250px-Wrong_Turn_movie.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Pânico na Floresta</h4>
+                    <div class="card-details"><span>2003</span><span>1h 24min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://m.media-amazon.com/images/I/61KK4JhRfVL._AC_UF894,1000_QL80_.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>+Velozes +Furiosos</h4>
+                    <div class="card-details"><span>2003</span><span>1h 47min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://upload.wikimedia.org/wikipedia/pt/2/22/Titanic_poster.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Titanic</h4>
+                    <div class="card-details"><span>1997</span><span>3h 14min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Jurassic Park: O Parque dos Dinossauros&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/mgjJ7FH4V3exsmoHwXrmsUhn0h1.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Jurassic Park: O Parque dos Dinossauros</h4>
+                    <div class="card-details"><span>1993</span><span>2h 2min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Pânico no Lago X Anaconda&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRx8p4GyorlV9E_qQ2K2an0WquJNg1RMgI_8e0hlZGVl4dCY-WbhWXJz0&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Pânico no Lago: Projeto Anaconda</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" data-genero="erotico" onclick="window.location.href='player.html?title=50 Tons de Cinza&url=https://playerflixapi.com/filme/tt2322441'">
+                <div class="tags"><span class="tag leg">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/t4kR6H71anOV85qzjOLlr9uVdFJ.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>50 Tons de Cinza</h4>
+                    <div class="card-details"><span>2016</span><span>2h 5min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/x3uhIodq56mlGBwpDTZ52trGb35.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Megatubarão 2</h4>
+                    <div class="card-details"><span>2023</span><span>45min</span></div>
+                </div>
+            </div>
+
+<div class="filme" data-genero="animaiskill" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://cdn.awsli.com.br/600x700/1181/1181256/produto/463538256b71b12cc4.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Cães Assasinos</h4>
+                    <div class="card-details"><span>2006</span><span>1h 48min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" data-genero="animaiskid" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://cdn.fstatic.com/media/movies/covers/2013/09/cacados_t1491.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Caçados</h4>
+                    <div class="card-details"><span>2007</span><span>1h 32min</span></div>
+                </div>
+            </div>
+
+<div class="filme" data-genero="animaiskillr" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/original/ip7nVBDhT9J9blktI3WGWMWCWco.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Morte Súbita</h4>
+                    <div class="card-details"><span>2007</span><span>1h 40min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://m.media-amazon.com/images/I/71Jh+sQHEaL._AC_UF1000,1000_QL80_.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>O Diabo Veste Prada</h4>
+                    <div class="card-details"><span>2006</span><span>1h 49min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w220_and_h330_face/aRK3qCe5FtTK6W3STgPihEhgpxA.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Olhos Famintos 2</h4>
+                    <div class="card-details"><span>2003</span><span>1h 46min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQly2n4e1daIyFCtpt78vZelIszlTn92uyT5oK7mUc6m9sJzJxNE28vygE&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Panico no Lago: O Capítulo Final</h4>
+                    <div class="card-details"><span>2012</span><span>1h 30min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img3.acsta.net/pictures/15/03/10/19/40/135848.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Sexta-Feira 13</h4>
+                    <div class="card-details"><span>1980</span><span>1h 35min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8HMgWqxxYFsM2eeblvET-uLzXSnagm9UcrljbFVg5d0VxiwrFZ5O_eN23xT7Zoq0mTGIP&s" alt="Capa">
+                <div class="card-info">
+                    <h4>Operação Fronteira</h4>
+                    <div class="card-details"><span>2008</span><span>1h 35min</span></div>
+                </div>
+            </div>
+
+<div class="filme" data-genero="luta" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQIj5mTlo20BEwR8f2IX9vhtmh4XTUhTdvjGvRakTPpuMbphafVlIm4Uf7akAiQbqdcSt8&s" alt="Capa">
+                <div class="card-info">
+                    <h4>O Imbatível III: Redenção</h4>
+                    <div class="card-details"><span>2010</span><span>1h 36min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://i.imgur.com/qKHBtdl.jpeg" alt="Capa">
+                <div class="card-info">
+                    <h4>O Protetor</h4>
+                    <div class="card-details"><span>2005</span><span>1h 41min</span></div>
+                </div>
+            </div>
+
+<div class="filme" onclick="window.location.href='player.html?title=Shin Godzilla&url=https://playerflixapi.com/filme/31'">
+                <div class="tags"><span class="tag leg">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdz3KUju6nUOLniNOCD-WVln0RSFlVtrYx8e4C5jAuSHRUEMshQcvwA-G1ZfZOY-mz2j2n&s" alt="Capa">
+                <div class="card-info">
+                    <h4>O Massacre da Serra Elétrica - O Início</h4>
+                    <div class="card-details"><span>2006</span><span>1h 31min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://m.media-amazon.com/images/I/31NH3h4tiQL._AC_UF894,1000_QL80_.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Piranha</h4>
+                    <div class="card-details"><span>2010</span><span>1h 28min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbqxSSq1LqrBMZBuHysniHa5EHxJAF71VNRqpHd6kBuWs5rPVAMoUzOdihawugiZCQabSyCG2y5c8l6h6koL7m1ij37AW0Quj3CMvYG64&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Pânico no Lago</h4>
+                    <div class="card-details"><span>1999</span><span>1h 32min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>A Bruxa de Blair</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://m.media-amazon.com/images/I/51y+qoVnh2L._AC_UF1000,1000_QL80_.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Inferno</h4>
+                    <div class="card-details"><span>1999</span><span>1h 35min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-oG6a8xa9iH6CzE_NJdEnOa2r0h4IYxwoz3sWzUTppjS07H5eGF_m7hDwmLYx4JEmpCqoCA&s" alt="Capa">
+                <div class="card-info">
+                    <h4>Os Mercenários 3</h4>
+                    <div class="card-details"><span>2014</span><span>2h 6min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="romance" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSn0orsg5iWRfoQ-dI0UqMfe0TBttUf5UfhhPFpdmPRofp5aGZ-FSYIS-_A1eUOxmB851u-sQ&s" alt="Capa">
+                <div class="card-info">
+                    <h4>A Culpa É Das Estrelas</h4>
+                    <div class="card-details"><span>2014</span><span>2h 6min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYWHYPvvKKGzcPq_2YivHqZobPLXXVFCYSeVRXcBxTZtu2MbY_q4lrvFRQUZOH92_Th8_9JQ&s" alt="Capa">
+                <div class="card-info">
+                    <h4>Ong Bak - Guerreiro Sagrado</h4>
+                    <div class="card-details"><span>2003</span><span>1h 48min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLMKx3At_3zgmlPn1FHVjzN1W_90fxbXvip_6zP_IbetBWl8IxN3sc2nWhtywPeVouz1kZZg&s" alt="Capa">
+                <div class="card-info">
+                    <h4>Guerra Mundial Z</h4>
+                    <div class="card-details"><span>2010</span><span>1h 28min</span></div>
+                </div>
+            </div>
+
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRlQ9p1Z_e7KLfHn76xTdNeZXVflhvFMYTU7z9T5YrQv7Xzr1jJmen5_CchXDmo7vmhAgx8&s" alt="Capa">
+                <div class="card-info">
+                    <h4>Carga Explosiva</h4>
+                    <div class="card-details"><span>2002</span><span>1h 32min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="terror" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img3.acsta.net/pictures/18/01/22/20/42/2800883.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Slender Man: Pesadelo sem Rosto</h4>
+                    <div class="card-details"><span>2018</span><span>1h 33min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=6 Balas&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://cdn.bcdn.zip/wp-content/uploads/2020/09/images-11.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>6 Balas</h4>
+                    <div class="card-details"><span>2012</span><span>1h 55min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Rampage: Destruição Total&url=https://playerflixapi.com/filme/tt2231461'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/7bhqCvl771uepyt6wbzEiryxEoc.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Rampage: Destruição Total</h4>
+                    <div class="card-details"><span>2018</span><span>1h 47min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/y8A0Cvp8WQmZ3bjbnsL53lY0dsC.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Pearl Harbor</h4>
+                    <div class="card-details"><span>2001</span><span>3h 3min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="romance" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img3.acsta.net/medias/nmedia/18/94/82/78/20359454.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Um Amo para Recordar</h4>
+                    <div class="card-details"><span>2002</span><span>1h 42min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/q5Lr8E4HSK7Lc4zqWtgtYsM1iJA.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Busca Implacável</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/zhtt4k4Vqz2k0frLtBddJmNbqjK.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Peaky Blinders: O Homem Imortal</h4>
+                    <div class="card-details"><span>2026</span><span>1h 52min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Baby Boy, Baby Girl&url=https://playerflixapi.com/filme/tt27102839'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/wbvEE0KghOVBzjy6F3rg5wWuJW2.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Pecadores</h4>
+                    <div class="card-details"><span>2023</span><span>1h 46min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Doĺly: A Boneca Maldita&url=https://playerflixapi.com/filme/tt32639175'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/gA6KpMPrixKiAgXvzVNrgQKv9bj.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Dolly: A Boneca Maldita</h4>
+                    <div class="card-details"><span>2026</span><span>1h 24min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="terror" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTEvfB7eES0kq6sR3HNUPxHgi1AYNi_S5gYlaPQzdR4r46J4dfUMl5sWjl7ZrJGl9LFG3ni&s" alt="Capa">
+                <div class="card-info">
+                    <h4>Sempre de Olho: Uma História Marble Hornet</h4>
+                    <div class="card-details"><span>2015</span><span>1h 32min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Na Terra de Santos e Pecadores&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://m.media-amazon.com/images/M/MV5BMDE5YTNjNDgtNmQzMS00Y2FlLTkyNmMtOTAyMWQwZDZhZjA2XkEyXkFqcGc@._V1_.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Na Terra de Santos e Pecadores</h4>
+                    <div class="card-details"><span>2023</span><span>1h 46min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://myembed.biz/filme/241261'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/gs8ZKdDLKERNRNSMu63niDi0YwL.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Perigosa Atração</h4>
+                    <div class="card-details"><span>2013</span><span>1h 20min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Capitão América: Guerra Civil&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img3.acsta.net/c_310_420/pictures/16/03/10/20/36/363874.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Capitão América: Guerra Civil</h4>
+                    <div class="card-details"><span>2016</span><span>2h 28min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="terror" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTX1GSLY5fMauywmIXUnN7xrYE7ZLhhIbzPIJnJWACXhI_yJ-JlKnXBWVI&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>They're Watching</h4>
+                    <div class="card-details"><span>2016</span><span>1h 35min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="documentario" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrMc6I7k3g-CQddi9JBkT5Zbh0nhsSFmcuIRQddHt9byto3LrBhDsBEXzpjy2pKo2xTHGSVg&s" alt="Capa">
+                <div class="card-info">
+                    <h4>Cuidado com o Slenderman</h4>
+                    <div class="card-details"><span>2016</span><span>1h 57min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=A Sombra e a Escuridão&url=https://playerflixapi.com/filme/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://m.media-amazon.com/images/M/MV5BYjJiYzgwYTMtNWYyNi00YjcwLWEyYzMtODk3ODczZGQxOTQ3XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>A Sombra e a Escuridão</h4>
+                    <div class="card-details"><span>1996</span><span>1h 50min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Capitães da Areia&url=https://playerflixapi.com/filme/tt1828148'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/dwwNKAaycN7VeCOijH7i2TIXL9m.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Capitães da Areia</h4>
+                    <div class="card-details"><span>2011</span><span>1h 36min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="terror" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/6f5Cut0KgX0cCcn8DqLNhPxWz8D.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Capps Crossing</h4>
+                    <div class="card-details"><span>2017</span><span>1h 25min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://cdn.iset.io/assets/52438/produtos/13447/22.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Punhos de Aço</h4>
+                    <div class="card-details"><span>2008</span><span>1h 31min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://m.media-amazon.com/images/M/MV5BY2NhYTljY2YtZmJkYS00Zjc2LTg2NDUtMmYxZGFhMjY4YTU0XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>O Homem de Aço</h4>
+                    <div class="card-details"><span>2013</span><span>2h 23min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=A Fera&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://media.fstatic.com/fNN394Og0osGFBWlIPf9ackwRfY=/322x478/smart/filters:format(webp)/media/movies/covers/2022/07/images_3.jpeg" alt="Capa">
+                <div class="card-info">
+                    <h4>A Fera</h4>
+                    <div class="card-details"><span>2022</span><span>1h 33min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://play-lh.googleusercontent.com/nwyUO3-qQ4Eth9nCJmsEDl7wh0abbT-ael2wKRcRGHz3SUV8pXIdLdllGGA5DRjJeUI" alt="Capa">
+                <div class="card-info">
+                    <h4>Arranha Céu</h4>
+                    <div class="card-details"><span>2018</span><span>1h 43min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=16 Quadras&url=https://playerflixapi.com/filme/tt0450232'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/tbWd6N4ORhDJxlMVO4vxRNEZtib.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>16 Quadras</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="luta" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQc4o2GldpzQSd9XgF080uZnLvY4RakgUEoQ-F-QZJqrA&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Espécies em Perigo</h4>
+                    <div class="card-details"><span>2021</span><span>1h 41min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=POV: Presença Oculta&url=https://playerflixapi.com/filme/tt37538172'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/k4MYn93RcAQDVo7PRV05QZudQF1.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>POV: Presença Oculta</h4>
+                    <div class="card-details"><span>2026</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="aventura" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqGKmkg1KFXzhU2d4zUt7SUMDjt4rWbDRkU7ezC8U2ZDw_MN_OV8pNyoE&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Dinossauro</h4>
+                    <div class="card-details"><span>2000</span><span>1h 22min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/jGrdGu169sivYwjxHXNtPrGpbl6.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Resgate Polar</h4>
+                    <div class="card-details"><span>2022</span><span>1h 42min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/filme/tt13147542'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/aL1DvA7f9QofwuIVt0kYp6txES.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Uno: Entre o Ouro e a Morte</h4>
+                    <div class="card-details"><span>2024</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=O Último Herege&url=https://playerflixapi.com/filme/tt19885330'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/scr1jp4IcNdeGddDrBEJLNYm9C3.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>O Último Herege</h4>
+                    <div class="card-details"><span>2022</span><span>1h 20min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRYYB8lmmwpPzoWC2vjUVJI4f9fuTzWXGXAINhwfV8wrXwo6sxpw13E73dukFulxdgy7un4IT_dVW0iA9x9b0TRhdkow03b42W4t_srw&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Ladrão de Diamantes</h4>
+                    <div class="card-details"><span>2004</span><span>1h 37min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://i.imgur.com/i29c8kM.jpeg" alt="Capa">
+                <div class="card-info">
+                    <h4>Acerto de Contas</h4>
+                    <div class="card-details"><span>2011</span><span>1h 34min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Vingadores: Ultimato&url=https://playerflixapi.com/filme/tt4154796'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/9fRX8UKlIW7Lb9GqNsJVakWWFCi.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Vingadores: Ultimato</h4>
+                    <div class="card-details"><span>2019</span><span>3h 1min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img3.acsta.net/c_310_420/pictures/15/06/18/18/25/209121.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Até a Morte</h4>
+                    <div class="card-details"><span>2007</span><span>1h 41min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="ficcao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-dZ42RaDqgQTgCUb-wTSeZh-2_wowTgNfQF1F2urlIBNfY6QCCPZ8P_LGS_BwCR377Btv&s" alt="Capa">
+                <div class="card-info">
+                    <h4>Circulo de Fogo: A Revolta</h4>
+                    <div class="card-details"><span>2018</span><span>1h 51min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="luta" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://mediaprd.adrenalinapura.com/wp-content/uploads/2024/05/11142505/UNDISPUTEDIILASTMANSTANDING_SOFA_20201204_3359_Poster_pt-BR.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>O Imbativel II: O Lutador</h4>
+                    <div class="card-details"><span>2006</span><span>1h 38min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQg1c60NxLYveIftZyXWdf8nUGRFbeW257ofySK85X8jPSqCbqIwi2ufGRkH_VDd21uQQ22VA&s" alt="Capa">
+                <div class="card-info">
+                    <h4>Busca Implacável 3</h4>
+                    <div class="card-details"><span>2014</span><span>1h 49min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://leiturafilmica.com.br/wp-content/uploads/2022/02/carga-preciosa-poster.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Carga Preciosa</h4>
+                    <div class="card-details"><span>2016</span><span>1h 30min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="ficcao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://upload.wikimedia.org/wikipedia/pt/thumb/4/4d/Jurassic_World_2015.jpg/250px-Jurassic_World_2015.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Jurassic World</h4>
+                    <div class="card-details"><span>2015</span><span>2h 4min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://upload.wikimedia.org/wikipedia/en/d/d8/Catch.44_Theatrical_Poster.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Catch .44</h4>
+                    <div class="card-details"><span>2011</span><span>1h 34min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Carga Explosiva 2&url=https://playerflixapi.com/filme/tt0388482'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/4Vo1KYTe0LWakRxTwp3scw8Ti6u.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Carga Explosiva 2</h4>
+                    <div class="card-details"><span>2005</span><span>1h 27min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwmOdeXN1brv_0m_CDexPMQYn2QeUkPksAnL-CwmU9UkANpequFJV7nFyJJidWKUVWSoWw6Q&s" alt="Capa">
+                <div class="card-info">
+                    <h4>Entrega de Risco</h4>
+                    <div class="card-details"><span>2012</span><span>1h 39min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="infantil" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://ingresso-a.akamaihd.net/img/cinema/cartaz/13406-cartaz.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>O Bom Dinossauro</h4>
+                    <div class="card-details"><span>2015</span><span>1h 33min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/pictures/17/10/23/19/55/0260439.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Liga da Justiça</h4>
+                    <div class="card-details"><span>2017</span><span>2h 00min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="luta" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiO-6o_HYodOJzgghQyxe-7NmSbkofce1lgR_BkuCppWuh0wSJfDDx8QTq72mpvK9yGYG4MA&s" alt="Capa">
+                <div class="card-info">
+                    <h4>Fração de Segundos</h4>
+                    <div class="card-details"><span>2019</span><span>1h 29min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="luta" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://upload.wikimedia.org/wikipedia/pt/7/75/Jurassic_Park_3_poster.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Jurassic Park 3</h4>
+                    <div class="card-details"><span>2001</span><span>1h 32min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="crime" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQiVDBv6XZtcyZQGVSnhhHviSkjfC0hZxhRvtroHm9o5Ui1b2N9IJlOkPbcTCNPMsMa2nITyA&s" alt="Capa">
+                <div class="card-info">
+                    <h4>Crimes Cruzados</h4>
+                    <div class="card-details"><span>2013</span><span>1h 28min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="ficcao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRlPd_vaHgK_OBfxHnqnSmqiOZlV4XPWpOxwOXFbQX0MVsPacRTw9stjNC-VQq4OE4TttmJ&s" alt="Capa">
+                <div class="card-info">
+                    <h4>A Montanha Enfeitiçada</h4>
+                    <div class="card-details"><span>2009</span><span>1h 38min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="guerra" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/90/43/36/20096333.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Bastardos Inglórios</h4>
+                    <div class="card-details"><span>2009</span><span>2h 33min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFkxtkAgqynnbPxtIECEqpJVr1VkznXyHpK1R4MjcxbQBHwvHPLtv5I2pXiRhWBz9mm3qIDg&s" alt="Capa">
+                <div class="card-info">
+                    <h4>Sem Lei</h4>
+                    <div class="card-details"><span>2011</span><span>1h 25min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="ficcao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img3.acsta.net/pictures/21/09/13/19/57/5568991.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Caça Jurássica</h4>
+                    <div class="card-details"><span>2021</span><span>1h 23min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="terror" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://i.imgur.com/t2EhkJq.jpeg" alt="Capa">
+                <div class="card-info">
+                    <h4>Left 4 Dead: The Movie</h4>
+                    <div class="card-details"><span>2016</span><span>50min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTd1jQODWcdSBpwXuZ65Yx9Z4VamOpbiaOnHCNK9j6_R9Xm4X_ZBs-w7VJZyMZqGAkEmgpKVM4XPzRVcsku1sE__uLW8kWdBf_PEQU3Cw&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Arsenal</h4>
+                    <div class="card-details"><span>2017</span><span>1h 37min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img3.acsta.net/pictures/14/06/10/23/17/544421.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Emboscada</h4>
+                    <div class="card-details"><span>2013</span><span>1h 36min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="luta" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYzvBoJTKqx9Kza2PpDj73kQNpTaWHlOKim6XkggPEgJ1Ir5n_IG38j_k1NbexqLPjbJSkZQ&s" alt="Capa">
+                <div class="card-info">
+                    <h4>Assassinos de Aluguel</h4>
+                    <div class="card-details"><span>2012</span><span>1h 36min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="luta" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/pictures/15/08/31/22/48/314883.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Acima da Lei</h4>
+                    <div class="card-details"><span>2011</span><span>1h 40min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Arquivo X</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="luta" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/91/94/79/20170917.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Projeto Dinossauro</h4>
+                    <div class="card-details"><span>2012</span><span>1h 23min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Mestre das Armas</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Trinit É O Meu Nome</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Fuga de Los Angeles</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>O Último Round</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Judas e Jesus: A História da Traição</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Resgate de Risco</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>O Dragão Chines</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>O Pequenino</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>As Branquelas</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Condessa de Sangue</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Os Pilares da Terra: Destruição do Templo</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFmfAknGtGyqoLEYMIb0oJp4dXOPSKT3JRGAOB4OMRrKYBld3A-Z3Gev8&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Forças de Proteção</h4>
+                    <div class="card-details"><span>2006</span><span>1h 50min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="luta" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Tekken</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Ong-Bak 3</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Homem Aranha: De Volta ao Lar</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Jogo Negro</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Vingança Bangkok</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Muito Além dos Limites</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Thor 3: Ragnarok</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>A Última Cartada 2</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="luta" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>O Protetor 2</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="luta" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Operação Dragão</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="ficcao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>O Exterminador do Futuro: A Salvação</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Jogo da Morte</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Besouro Verde</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Mandando Bala</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Vingadores 3: Guerra Infinita</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>O Voo do Dragão</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Ninja Assasino</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>As Tartarugas Ninja: O Filme</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Lutador de Rua</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Honra</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Força de Ataque</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>A Réplica</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Knock Off</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Assasino a Preço Fixo</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>The Quest</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPD9ADY6VbNEAHZYWa3U0TQT0_255q0r7uMQtA_-ly3xDo3OskaTUQOxFcn-p6Bm3o8sVtXQ&s" alt="Capa">
+                <div class="card-info">
+                    <h4>Jurassic World: A Batalha de Big Rock</h4>
+                    <div class="card-details"><span>2019</span><span>10min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Sansão e Dalila</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Os Vingadores</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>G.I Joe Retaliação</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="ficcao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://m.media-amazon.com/images/M/MV5BODQ3YTVkZTktYTZjYy00ZmRhLWIwODUtNjBhMzMwMDlkNWM5XkEyXkFqcGc@._V1_.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>65: Ameaça Pré-Histórica</h4>
+                    <div class="card-details"><span>2023</span><span>1h 33min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Olhos de Dragão</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Os Mercenários</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="luta" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://play-lh.googleusercontent.com/nfFe7vdsqTDqAoLMA0zGySRUUr95De-nepcnD36FDSKUeK3_ZJSpKUgzv5NPNPXRrRGNXQ=w240-h480-rw" alt="Capa">
+                <div class="card-info">
+                    <h4>Lego Jurassic World: A Fuga do Indominous Rex</h4>
+                    <div class="card-details"><span>2016</span><span>25min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Evocando Espíritos</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="misterio" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://i.imgur.com/wFscjg7.jpeg" alt="Capa">
+                <div class="card-info">
+                    <h4>A Empregada</h4>
+                    <div class="card-details"><span>2025</span><span>2h 13min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>A Bruxa de Blair 2</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Sharknado</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="ficcao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDArG2aGjriUV01awB4gJvk5ODUnaBza6oHqyrfIZ-9FRXsCda9oIIXyW5VmIHY2xXM8M&s" alt="Capa">
+                <div class="card-info">
+                    <h4>O Mundo Perdido: Jurassic Park</h4>
+                    <div class="card-details"><span>1997</span><span>2h 9min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Corações Sujos</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/medias/nmedia/18/93/98/96/20293294.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>A Bruxa de Blair 3</h4>
+                    <div class="card-details"><span>1999</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Busca Implacável 2&url=https://playerflixapi.com/filme/tt1397280'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/laLGcxl36GAxahL5PbUC8qvabzO.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Busca Implacável 2</h4>
+                    <div class="card-details"><span>2012</span><span>1h 32min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Godzilla II: Rei dos Monstros&url=https://playerflixapi.com/filme/tt3741700'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/2umU3r6V4V2gTmSnZJmH61nTorF.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Godzilla II: Rei dos Monstros</h4>
+                    <div class="card-details"><span>2019</span><span>2h 12min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Carga Explosiva 3&url=https://playerflixapi.com/filme/tt1129442'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/t6ayrfuhmKl6VUOByP7RJL047X1.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Carga Explosiva 3</h4>
+                    <div class="card-details"><span>2008</span><span>1h 44min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Godzilla x Kong: Supernova&url=https://playerflixapi.com/filme/tt32561550'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/gEGDDG6QMDFZ1sV32CGxvzaVPnv.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Godzilla x Kong: Supernova</h4>
+                    <div class="card-details"><span>2027</span><span>1h 18min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://image.tmdb.org/t/p/w500/F4k01H7IG8S3msL9JNSa3T8nHc.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Vingadores: Doutor Destino</h4>
+                    <div class="card-details"><span>2026</span><span>3h 45min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcLm0SoPjI_HREf0n3pgjy4ssvONALiOe2PXyVNo-i4Q&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Transformers: O Início</h4>
+                    <div class="card-details"><span>2024</span><span>1h 44min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://upload.wikimedia.org/wikipedia/pt/3/3a/Interstellar_Filme.png" alt="Capa">
+                <div class="card-info">
+                    <h4>Interestelar</h4>
+                    <div class="card-details"><span>2014</span><span>2h 49min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="terror" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img3.acsta.net/c_310_420/pictures/16/05/19/19/09/238445.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>A Grande Caçada</h4>
+                    <div class="card-details"><span>2014</span><span>1h 35min</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="ficcao" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://playerflixapi.com/serie/cyberpunk'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://upload.wikimedia.org/wikipedia/pt/a/a5/Jurassic_World_Rebirth_poster.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Jurassic World: Recomeço</h4>
+                    <div class="card-details"><span>2025</span><span>2h 14min</span></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="bottom-pagination" id="pagination-controls">
+            <button class="btn-wine" id="btn-prev" onclick="voltarPagina()">&laquo; PREV</button>
+            <button class="btn-wine" id="btn-next" onclick="avancarPagina()">NEXT &raquo;</button>
+        </div>
+    </main>
+
+    <script>
+        const enableRandomOrder = false;
+        const filmesPorPagina = 30;
+        
+        let todosFilmes = [];
+        let filmesAtuais = [];
+        let paginaAtual = 1;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const container = document.getElementById("lista-filmes");
+            let elementos = Array.from(document.querySelectorAll(".filme"));
+
+            if (enableRandomOrder) {
+                for (let i = elementos.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [elementos[i], elementos[j]] = [elementos[j], elementos[i]];
+                }
+                elementos.forEach(el => container.appendChild(el));
+            }
+
+            todosFilmes = elementos;
+            filmesAtuais = [...todosFilmes];
+            atualizarVisualizacao();
+        });
+
+        function atualizarVisualizacao() {
+            const totalPaginas = Math.ceil(filmesAtuais.length / filmesPorPagina) || 1;
+            
+            document.getElementById("page-info").innerText = `Pág ${paginaAtual} de ${totalPaginas}`;
+            document.getElementById("btn-next").disabled = paginaAtual >= totalPaginas;
+
+            todosFilmes.forEach(f => f.classList.add("hidden"));
+
+            let inicio = (paginaAtual - 1) * filmesPorPagina;
+            let fim = inicio + filmesPorPagina;
+
+            for (let i = inicio; i < fim && i < filmesAtuais.length; i++) {
+                filmesAtuais[i].classList.remove("hidden");
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function avancarPagina() {
+            const totalPaginas = Math.ceil(filmesAtuais.length / filmesPorPagina);
+            if (paginaAtual < totalPaginas) {
+                paginaAtual++;
+                atualizarVisualizacao();
+            }
+        }
+
+        function voltarPagina() {
+            if (paginaAtual > 1) {
+                paginaAtual--;
+                atualizarVisualizacao();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function aplicarFiltrosESearch() {
+            let termo = document.getElementById("search-input").value.toLowerCase();
+            let generoSelecionado = document.getElementById("filter-select").value;
+            let controlesPaginacao = document.getElementById("pagination-controls");
+
+            filmesAtuais = todosFilmes.filter(filme => {
+                let titulo = filme.querySelector("h4").innerText.toLowerCase();
+                let generoFilme = filme.getAttribute("data-genero") || "";
+                
+                let combinaBusca = titulo.includes(termo);
+                let combinaGenero = (generoSelecionado === "todos" || generoFilme === generoSelecionado);
+
+                return combinaBusca && combinaGenero;
+            });
+
+            if (termo.length > 0) {
+                controlesPaginacao.style.display = "none";
+                document.getElementById("page-info").innerText = "Buscando...";
+                
+                todosFilmes.forEach(f => f.classList.add("hidden"));
+                filmesAtuais.forEach(f => f.classList.remove("hidden"));
+                
+                let resultados = filmesAtuais.length;
+                document.getElementById("page-info").innerText = resultados === 0 ? "Nada encontrado" : `${resultados} resultado(s)`;
+            } else {
+                controlesPaginacao.style.display = "flex";
+                paginaAtual = 1;
+                atualizarVisualizacao();
+            }
+        }
+
+        document.getElementById("search-input").addEventListener("keyup", aplicarFiltrosESearch);
+        document.getElementById("filter-select").addEventListener("change", aplicarFiltrosESearch);
+
+    </script>
+</body>
+</html>
