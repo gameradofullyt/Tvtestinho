@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações da Conta - Profissional & Estiloso</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- ESTILOS GERAIS & TEMA ESCURO --- */
+        :root {
+            --bg-body: #0a0a0c; 
+            --bg-card: #141417; 
+            --bg-banner: #111113;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a5;
+            --accent-pink: #ff5e99; 
+            --accent-pink-hover: #ff3c84;
+            --border-color: #222226;
+            --shadow-card: 0 10px 30px rgba(0,0,0,0.5);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* --- CONTAINER PRINCIPAL --- */
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding-bottom: 100px; /* Aumentado para dar espaço ao menu inferior */
+        }
+
+        /* --- CABEÇALHO DO PERFIL (HEADER) --- */
+        .profile-header {
+            position: relative;
+            background-color: var(--bg-banner);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Banner - Adapta qualquer formato automaticamente */
+        .banner {
+            height: 180px;
+            background-color: #111;
+            background-size: cover; /* Faz com que a imagem cubra o espaço sem distorcer */
+            background-position: center; /* Centraliza a imagem */
+            background-repeat: no-repeat;
+            position: relative;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        .banner:hover { opacity: 0.8; }
+
+        .change-cover-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(5px);
+            transition: var(--transition);
+        }
+        .change-cover-btn:hover { background: rgba(0, 0, 0, 0.8); border-color: white; }
+
+        /* Avatar Area */
+        .avatar-area {
+            position: relative;
+            margin-top: -65px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 20px;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background-color: #2a2a2e;
+            border: 5px solid var(--bg-body);
+            background-size: cover;
+            background-position: center;
+            transition: var(--transition);
+        }
+        .avatar-wrapper:hover .avatar { filter: brightness(0.7); }
+
+        .change-avatar-icon {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background-color: var(--accent-pink);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 3px solid var(--bg-body);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            pointer-events: none; 
+        }
+
+        /* Informações do Perfil */
+        .info-area {
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .user-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        /* Username com ícone de edição */
+        .user-handle-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--accent-pink);
+            font-size: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            user-select: none;
+        }
+        .user-handle-container:hover { color: var(--accent-pink-hover); }
+        
+        .user-handle { font-weight: 500; }
+        .edit-icon { font-size: 12px; }
+
+        .acc-details {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* --- SEÇÃO DE CONFIGURAÇÕES --- */
+        .settings-area {
+            padding: 30px 20px;
+        }
+
+        .settings-title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            letter-spacing: -0.5px;
+        }
+
+        .settings-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .settings-card {
+            background-color: var(--bg-card);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-card);
+            transition: transform 0.2s;
+        }
+        .settings-card:hover { transform: translateY(-2px); }
+
+        .card-header {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-header i { color: var(--accent-pink); font-size: 16px; }
+
+        .settings-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid #1c1c1f;
+        }
+        .settings-item:last-child { border-bottom: none; }
+
+        .item-label {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 15px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        .item-label i {
+            color: var(--text-secondary);
+            font-size: 17px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .item-subtext {
+            display: block;
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-top: 2px;
+        }
+
+        /* --- CONTROLES ESPECÍFICOS --- */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px; width: 20px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        input:checked + .slider { background-color: var(--accent-pink); }
+        input:focus + .slider { box-shadow: 0 0 1px var(--accent-pink); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid #333;
+            color: var(--text-primary);
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .action-btn:hover { background: #1c1c1f; border-color: #444; }
+
+        .logout-container {
+            grid-column: 1 / -1; 
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .logout-btn {
+            background-color: rgba(255, 94, 153, 0.08);
+            color: var(--accent-pink);
+            border: 1px solid rgba(255, 94, 153, 0.2);
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: var(--transition);
+            width: auto;
+        }
+        .logout-btn:hover { background-color: rgba(255, 94, 153, 0.15); transform: translateY(-1px); border-color: rgba(255, 94, 153, 0.4); }
+        .logout-btn i { font-size: 16px; }
+
+        .hidden-file-input { display: none; }
+
+        /* --- MODAIS & AVISOS --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: var(--transition);
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+
+        .modal-card {
+            background-color: var(--bg-card);
+            border-radius: 20px;
+            width: 90%; max-width: 400px;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            transform: scale(0.9);
+            transition: var(--transition);
+            text-align: center;
+        }
+        .modal-overlay.active .modal-card { transform: scale(1); }
+
+        .modal-header { font-size: 20px; font-weight: 700; margin-bottom: 15px; }
+        .modal-body { color: var(--text-secondary); font-size: 14px; margin-bottom: 25px; }
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            background: #111;
+            border: 1px solid var(--border-color);
+            color: white;
+            font-family: inherit;
+            margin-bottom: 15px;
+        }
+        .modal-input:focus { border-color: var(--accent-pink); }
+        
+        .modal-footer { display: flex; gap: 10px; justify-content: center; }
+        .modal-btn { padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: var(--transition); font-size: 14px; }
+        
+        .modal-btn-confirm { background-color: var(--accent-pink); color: white; border: none; }
+        .modal-btn-confirm:hover { background-color: var(--accent-pink-hover); }
+        
+        .modal-btn-cancel { background: transparent; color: var(--text-secondary); border: 1px solid #333; }
+        .modal-btn-cancel:hover { background: #1c1c1f; }
+
+        #top-alert-banner {
+            position: fixed;
+            top: -100px; left: 0; width: 100%;
+            background-color: #f44336; 
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+            z-index: 3000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: top 0.4s ease;
+        }
+        #top-alert-banner.active { top: 0; }
+
+        .loader {
+            border: 3px solid #333;
+            border-top: 3px solid var(--accent-pink);
+            border-radius: 50%;
+            width: 24px; height: 24px;
+            animation: spin 1s linear infinite;
+            display: none;
+            position: absolute;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- MENU INFERIOR --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(20, 20, 23, 0.95);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 12px 0;
+            border-top: 1px solid var(--border-color);
+            z-index: 1000;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+        }
+        
+        .nav-item {
+            text-decoration: none;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .nav-item i {
+            font-size: 22px;
+            margin-bottom: 2px;
+            transition: var(--transition);
+        }
+        
+        .nav-item.active, .nav-item:hover {
+            color: var(--accent-pink);
+        }
+        
+        .nav-item.active i {
+            transform: scale(1.1);
+        }
+
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+
+    </style>
+</head>
+<body>
+
+    <div id="top-alert-banner">
+        ⚠️ <span id="alert-message">Aviso!</span>
+    </div>
+
+    <div class="main-container">
+        
+        <header class="profile-header">
+            <div class="banner" id="banner-view" title="Clique para alterar a capa">
+                <button class="change-cover-btn" id="change-cover-trigger">
+                    <i class="fas fa-camera"></i> Alterar Capa
+                </button>
+                <div class="loader" id="banner-loader" style="top: 20px; left: 20px;"></div>
+            </div>
+
+            <div class="avatar-area">
+                <div class="avatar-wrapper" id="avatar-trigger" title="Clique para alterar a foto de perfil">
+                    <div class="avatar" id="avatar-view"></div>
+                    <div class="change-avatar-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <div class="loader" id="avatar-loader" style="top: calc(50% - 12px); left: calc(50% - 12px);"></div>
+                </div>
+            </div>
+
+            <div class="info-area">
+                <h1 class="user-name" id="display-name">Carregando...</h1>
+                <div class="user-handle-container" id="edit-handle-trigger" title="Clique para alterar seu @">
+                    @<span class="user-handle" id="display-handle">user</span>
+                    <i class="fas fa-pen edit-icon"></i>
+                </div>
+                <p class="acc-details">
+                    Entrou desde: <span id="display-join-date">•</span> • Pontos: <span id="display-points" style="color: var(--accent-pink); font-weight: bold;">0</span>
+                </p>
+            </div>
+        </header>
+
+        <main class="settings-area">
+            <h2 class="settings-title">Configurações</h2>
+
+            <div class="settings-cards-grid">
+
+                <div class="settings-card">
+                    <div class="card-header"><i class="fas fa-cog"></i> Preferências Gerais</div>
+                    
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-bell"></i>
+                            <div>
+                                Notificações do Site
+                                <span class="item-subtext">Alertas sonoros e visuais no navegador</span>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="cfg-notif" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-play-circle"></i>
+                            <div>
+                                Autoplay no Player
+                                <span class="item-subtext">Reproduzir próximo conteúdo automaticamente</span>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="cfg-autoplay">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-language"></i>
+                            Idioma do Aplicativo
+                        </div>
+                        <select class="action-btn" id="cfg-lang">
+                            <option value="pt-br">Português (BR)</option>
+                            <option value="en">English</option>
+                            <option value="es">Español</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-header"><i class="fas fa-paint-brush"></i> Personalização</div>
+                    
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-adjust"></i>
+                            Tema do Aplicativo
+                        </div>
+                        <select class="action-btn" id="cfg-theme">
+                            <option value="deep-dark">Deep Dark (Padrão)</option>
+                            <option value="light">Claro</option>
+                            <option value="oled">OLED (Preto Puro)</option>
+                            <option value="pink-gamer">Pink Gamer</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-text-height"></i>
+                            Tamanho da Fonte
+                        </div>
+                        <select class="action-btn" id="cfg-font-size">
+                            <option value="medium">Média (Padrão)</option>
+                            <option value="small">Pequena</option>
+                            <option value="large">Grande</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-border-all"></i>
+                            Layout da Home
+                        </div>
+                        <select class="action-btn" id="cfg-home-layout">
+                            <option value="grid">Grade (Padrão)</option>
+                            <option value="list">Lista Compacta</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-header"><i class="fas fa-shield-alt"></i> Segurança</div>
+                    
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-key"></i>
+                            Alterar Senha
+                        </div>
+                        <button class="action-btn" onclick="openModal('modal-password')">Alterar</button>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-user-check"></i>
+                            Autenticação de Dois Fatores (2FA)
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="cfg-2fa">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-mobile-alt"></i>
+                            Gerenciar Dispositivos
+                        </div>
+                        <button class="action-btn">Ver Lista (3)</button>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-header"><i class="fas fa-lock"></i> Privacidade</div>
+                    
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-eye-slash"></i>
+                            Perfil Privado
+                            <span class="item-subtext">Apenas amigos veem seu perfil</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="cfg-private-profile">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-calendar-alt"></i>
+                            Mostrar Data de Inscrição
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="cfg-show-join" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-download"></i>
+                            Solicitar Meus Dados
+                        </div>
+                        <button class="action-btn">Solicitar</button>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-header"><i class="fas fa-users"></i> Social</div>
+                    
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-comments"></i>
+                            Ativar Comentários
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="cfg-comments" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-filter"></i>
+                            Filtro de Linguagem
+                            <span class="item-subtext">Esconder palavras ofensivas</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="cfg-filter" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-envelope"></i>
+                            Quem pode enviar mensagens
+                        </div>
+                        <select class="action-btn" id="cfg-dm">
+                            <option value="all">Todos</option>
+                            <option value="friends">Amigos</option>
+                            <option value="none">Ninguém</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-header"><i class="fas fa-trophy"></i> Conquistas & Pontos</div>
+                    
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-chart-line"></i>
+                            Aparecer no Ranking Global
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="cfg-ranking" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-bullhorn"></i>
+                            Notificações de Desafios
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="cfg-challenges" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-id-badge"></i>
+                            Exibir Emblemas no Perfil
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="cfg-badges" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-header"><i class="fas fa-video"></i> Streaming</div>
+                    
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-hd"></i>
+                            Qualidade Padrão
+                        </div>
+                        <select class="action-btn" id="cfg-quality">
+                            <option value="auto">Automática</option>
+                            <option value="1080p">1080p</option>
+                            <option value="720p">720p</option>
+                            <option value="480p">480p</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-subtitle"></i>
+                            Legendas Automáticas
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="cfg-subs">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-palette"></i>
+                            Estilo da Legenda
+                        </div>
+                        <button class="action-btn">Personalizar</button>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="card-header"><i class="fas fa-hdd"></i> Dados</div>
+                    
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-trash-alt"></i>
+                            Limpar Cache do App
+                            <span class="item-subtext">Pode liberar espaço (52MB)</span>
+                        </div>
+                        <button class="action-btn">Limpar</button>
+                    </div>
+
+                    <div class="settings-item">
+                        <div class="item-label">
+                            <i class="fas fa-server"></i>
+                            Uso de Dados Móveis
+                        </div>
+                        <select class="action-btn" id="cfg-mobile-data">
+                            <option value="low">Baixo (Economia)</option>
+                            <option value="high">Alto (Melhor Qualidade)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="logout-container">
+                    <button class="logout-btn" id="logout-trigger">
+                        <i class="fas fa-sign-out-alt"></i> Sair da Conta
+                    </button>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Início</span>
+        </a>
+        <a href="generos.html" class="nav-item">
+            <i class="fas fa-th-large"></i>
+            <span>Gêneros</span>
+        </a>
+        <a href="explorar.html" class="nav-item">
+            <i class="fas fa-compass"></i>
+            <span>Explorar</span>
+        </a>
+        <a href="conta.html" class="nav-item active">
+            <i class="fas fa-user"></i>
+            <span>Conta</span>
+        </a>
+    </nav>
+
+    <input type="file" id="banner-input" class="hidden-file-input" accept="*/*">
+    <input type="file" id="avatar-input" class="hidden-file-input" accept="image/*">
+
+    <div class="modal-overlay" id="modal-handle-overlay">
+        <div class="modal-card">
+            <div class="modal-header">Alterar Nome de Usuário</div>
+            <div class="modal-body">
+                Crie um @ único. Se alguém já tiver esse nome, você não poderá usá-lo.
+            </div>
+            <input type="text" class="modal-input" id="new-handle-input" placeholder="@novo_usuario">
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeModal('modal-handle')">Cancelar</button>
+                <button class="modal-btn modal-btn-confirm" id="confirm-handle-change">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-password-overlay">
+        <div class="modal-card">
+            <div class="modal-header">Alterar Senha</div>
+            <input type="password" class="modal-input" placeholder="Senha Atual">
+            <input type="password" class="modal-input" placeholder="Nova Senha">
+            <input type="password" class="modal-input" placeholder="Confirmar Nova Senha">
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeModal('modal-password')">Cancelar</button>
+                <button class="modal-btn modal-btn-confirm" onclick="closeModal('modal-password')">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // ==========================================
+            // BANCO DE DADOS MOCK - USUÁRIOS REGISTRADOS
+            // ==========================================
+            // Simula um banco de dados de nomes de usuários que já existem
+            let takenUsernames = JSON.parse(localStorage.getItem('globalUsernamesDatabase')) || [];
+            
+            // Pré-populando com os exemplos exigidos caso esteja vazio
+            if (takenUsernames.length === 0) {
+                takenUsernames.push('gamerado', 'gameradofull', 'admin', 'suporte');
+                localStorage.setItem('globalUsernamesDatabase', JSON.stringify(takenUsernames));
+            }
+
+
+            // ==========================================
+            // SISTEMA DE PUXAR DADOS DA CONTA & PONTOS
+            // ==========================================
+            if (!localStorage.getItem('selectedUser')) {
+                const defaultUser = {
+                    name: "Gamerado", // Puxa do selecaoconta.html
+                    handle: "gamerado_oficial",
+                    joinTimestamp: new Date().getTime(), 
+                    points: 0, // Inicia sempre com 0 se for conta nova
+                    avatar: "",
+                    banner: ""
+                };
+                localStorage.setItem('selectedUser', JSON.stringify(defaultUser));
+            }
+
+            let userData = JSON.parse(localStorage.getItem('selectedUser'));
+
+            // O NOME NO PERFIL É ESTRITAMENTE O MESMO DO SELECAOCONTA.HTML
+            document.getElementById('display-name').textContent = userData.name;
+            document.getElementById('display-handle').textContent = userData.handle;
+            
+            // Exibir pontos (garantindo que se não existir, seja 0)
+            if (typeof userData.points === 'undefined') userData.points = 0;
+            document.getElementById('display-points').textContent = userData.points;
+            
+            // Carregar imagens (Banner se adapta via CSS cover)
+            if (userData.avatar) {
+                document.getElementById('avatar-view').style.backgroundImage = `url(${userData.avatar})`;
+            }
+            if (userData.banner) {
+                document.getElementById('banner-view').style.backgroundImage = `url(${userData.banner})`;
+            }
+
+            function calculateJoinDate(timestamp) {
+                const joinDate = new Date(timestamp);
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                return joinDate.toLocaleDateString('pt-BR', options);
+            }
+            document.getElementById('display-join-date').textContent = calculateJoinDate(userData.joinTimestamp);
+
+
+            // ==========================================
+            // SISTEMA DE PONTOS POR TEMPO ATIVO
+            // ==========================================
+            // sessionStorage mantém os dados enquanto a aba do site estiver aberta.
+            // Isso garante a regra de "sem sair do site".
+            
+            if (!sessionStorage.getItem('sessionStartTime')) {
+                sessionStorage.setItem('sessionStartTime', Date.now());
+                sessionStorage.setItem('awarded30m', 'false');
+                sessionStorage.setItem('awarded60m', 'false');
+            }
+
+            // Verifica o tempo a cada 10 segundos
+            setInterval(() => {
+                const startTime = parseInt(sessionStorage.getItem('sessionStartTime'));
+                const now = Date.now();
+                const minutesElapsed = Math.floor((now - startTime) / 60000); 
+
+                let currentData = JSON.parse(localStorage.getItem('selectedUser'));
+                let pointsToAdd = 0;
+
+                // Regra: Aos 30 minutos ganha 100
+                if (minutesElapsed >= 30 && minutesElapsed < 60 && sessionStorage.getItem('awarded30m') === 'false') {
+                    pointsToAdd = 100;
+                    sessionStorage.setItem('awarded30m', 'true');
+                    showTopAlert(`🎉 Você ganhou +100 pontos por 30 minutos online!`, '#4CAF50');
+                }
+                
+                // Regra: A 1 hora (60 min) direto ganha 500
+                if (minutesElapsed >= 60 && sessionStorage.getItem('awarded60m') === 'false') {
+                    pointsToAdd = 500;
+                    sessionStorage.setItem('awarded60m', 'true');
+                    showTopAlert(`🔥 INCRÍVEL! +500 pontos por 1 hora direto no site!`, '#ff5e99');
+                    
+                    // Reseta o ciclo para poder ganhar de novo se ficar mais tempo
+                    sessionStorage.setItem('sessionStartTime', Date.now());
+                    sessionStorage.setItem('awarded30m', 'false');
+                    sessionStorage.setItem('awarded60m', 'false');
+                }
+
+                if (pointsToAdd > 0) {
+                    currentData.points += pointsToAdd;
+                    localStorage.setItem('selectedUser', JSON.stringify(currentData));
+                    document.getElementById('display-points').textContent = currentData.points;
+                }
+
+            }, 10000); // 10000 ms = 10 segundos de verificação
+
+
+            // ==========================================
+            // SISTEMA DE UPLOAD DE CAPA E AVATAR
+            // ==========================================
+            function handleFileUpload(inputId, viewId, loaderId, storageKey) {
+                const input = document.getElementById(inputId);
+                const view = document.getElementById(viewId);
+                const loader = document.getElementById(loaderId);
+
+                input.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    loader.style.display = 'block';
+                    if (viewId === 'avatar-view') view.style.opacity = '0.3';
+
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const base64String = event.target.result;
+                        
+                        const currentData = JSON.parse(localStorage.getItem('selectedUser'));
+                        currentData[storageKey] = base64String;
+                        localStorage.setItem('selectedUser', JSON.stringify(currentData)); // Salva permanentemente
+
+                        view.style.backgroundImage = `url(${base64String})`;
+                        
+                        setTimeout(() => {
+                            loader.style.display = 'none';
+                            view.style.opacity = '1';
+                        }, 500); 
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            document.getElementById('change-cover-trigger').addEventListener('click', () => {
+                document.getElementById('banner-input').click();
+            });
+            handleFileUpload('banner-input', 'banner-view', 'banner-loader', 'banner');
+
+            document.getElementById('avatar-trigger').addEventListener('click', () => {
+                document.getElementById('avatar-input').click();
+            });
+            handleFileUpload('avatar-input', 'avatar-view', 'avatar-loader', 'avatar');
+
+
+            // ==========================================
+            // SISTEMA DE NOME DE USUÁRIO ÚNICO (@)
+            // ==========================================
+            const handleTrigger = document.getElementById('edit-handle-trigger');
+            const confirmHandleBtn = document.getElementById('confirm-handle-change');
+            const handleInput = document.getElementById('new-handle-input');
+            
+            handleTrigger.addEventListener('click', () => {
+                handleInput.value = document.getElementById('display-handle').textContent;
+                openModal('modal-handle');
+            });
+
+            confirmHandleBtn.addEventListener('click', () => {
+                let newHandle = handleInput.value.trim().toLowerCase();
+                if (newHandle.startsWith('@')) newHandle = newHandle.substring(1);
+
+                if (newHandle.length < 3) {
+                    handleInput.style.borderColor = '#f44336';
+                    return;
+                }
+
+                // 1. Verifica se já não é o nome atual dele
+                const currentData = JSON.parse(localStorage.getItem('selectedUser'));
+                if (newHandle === currentData.handle.toLowerCase()) {
+                    closeModal('modal-handle');
+                    return; 
+                }
+
+                // 2. Busca no banco de dados global (mock)
+                let dbUsernames = JSON.parse(localStorage.getItem('globalUsernamesDatabase'));
+                
+                if (dbUsernames.includes(newHandle)) {
+                    // NOME JÁ EXISTE - Bloqueia
+                    showTopAlert(`O usuário @${newHandle} já está sendo usado por outra pessoa!`, '#f44336');
+                    handleInput.style.borderColor = '#f44336';
+                } else {
+                    // NOME DISPONÍVEL - Salva
+                    // Remove o antigo da database (opcional, mas bom pra liberar nomes)
+                    dbUsernames = dbUsernames.filter(u => u !== currentData.handle.toLowerCase());
+                    
+                    // Adiciona o novo e salva
+                    dbUsernames.push(newHandle);
+                    localStorage.setItem('globalUsernamesDatabase', JSON.stringify(dbUsernames));
+
+                    // Atualiza perfil local permanentemente
+                    currentData.handle = newHandle;
+                    localStorage.setItem('selectedUser', JSON.stringify(currentData));
+                    document.getElementById('display-handle').textContent = newHandle;
+
+                    closeModal('modal-handle');
+                    showTopAlert(`@${newHandle} salvo com sucesso!`, '#4CAF50'); 
+                }
+            });
+
+
+            // ==========================================
+            // SISTEMA DE CONFIGURAÇÕES FUNCIONAIS (PERSISTÊNCIA)
+            // ==========================================
+            if (!localStorage.getItem('appSettings')) {
+                const defaultSettings = {
+                    notif: true, autoplay: false, lang: 'pt-br', theme: 'deep-dark',
+                    fontSize: 'medium', private: false, showJoin: true, comments: true,
+                    filter: true, ranking: true, quality: 'auto'
+                };
+                localStorage.setItem('appSettings', JSON.stringify(defaultSettings));
+            }
+
+            const settings = JSON.parse(localStorage.getItem('appSettings'));
+
+            document.getElementById('cfg-notif').checked = settings.notif;
+            document.getElementById('cfg-autoplay').checked = settings.autoplay;
+            document.getElementById('cfg-lang').value = settings.lang;
+            document.getElementById('cfg-theme').value = settings.theme;
+            document.getElementById('cfg-font-size').value = settings.fontSize;
+            document.getElementById('cfg-private-profile').checked = settings.private;
+            document.getElementById('cfg-show-join').checked = settings.showJoin;
+            document.getElementById('cfg-comments').checked = settings.comments;
+            document.getElementById('cfg-filter').checked = settings.filter;
+            document.getElementById('cfg-ranking').checked = settings.ranking;
+            document.getElementById('cfg-quality').value = settings.quality;
+
+            const joinDateDisplay = document.getElementById('display-join-date').parentElement;
+            joinDateDisplay.style.display = settings.showJoin ? 'inline' : 'none';
+
+            function addSettingListener(id, key, type) {
+                document.getElementById(id).addEventListener('change', (e) => {
+                    const currentSettings = JSON.parse(localStorage.getItem('appSettings'));
+                    if (type === 'checkbox') {
+                        currentSettings[key] = e.target.checked;
+                        if (id === 'cfg-show-join') joinDateDisplay.style.display = e.target.checked ? 'inline' : 'none';
+                    } else {
+                        currentSettings[key] = e.target.value;
+                        if (id === 'cfg-theme') applyTheme(e.target.value);
+                    }
+                    localStorage.setItem('appSettings', JSON.stringify(currentSettings));
+                });
+            }
+
+            addSettingListener('cfg-notif', 'notif', 'checkbox');
+            addSettingListener('cfg-autoplay', 'autoplay', 'checkbox');
+            addSettingListener('cfg-lang', 'lang', 'select');
+            addSettingListener('cfg-theme', 'theme', 'select');
+            addSettingListener('cfg-font-size', 'fontSize', 'select');
+            addSettingListener('cfg-private-profile', 'private', 'checkbox');
+            addSettingListener('cfg-show-join', 'showJoin', 'checkbox');
+            addSettingListener('cfg-comments', 'comments', 'checkbox');
+            addSettingListener('cfg-filter', 'filter', 'checkbox');
+            addSettingListener('cfg-ranking', 'ranking', 'checkbox');
+            addSettingListener('cfg-quality', 'quality', 'select');
+
+            function applyTheme(theme) {
+                if (theme === 'oled') {
+                    document.documentElement.style.setProperty('--bg-body', '#000000');
+                    document.documentElement.style.setProperty('--bg-card', '#080808');
+                } else if (theme === 'pink-gamer') {
+                    document.documentElement.style.setProperty('--bg-body', '#1a0e14');
+                    document.documentElement.style.setProperty('--border-color', '#ff5e9933');
+                } else {
+                    document.documentElement.style.setProperty('--bg-body', '#0a0a0c');
+                    document.documentElement.style.setProperty('--bg-card', '#141417');
+                    document.documentElement.style.setProperty('--border-color', '#222226');
+                }
+            }
+            applyTheme(settings.theme); 
+
+            // ==========================================
+            // SISTEMA DE SAIR DA CONTA
+            // ==========================================
+            document.getElementById('logout-trigger').addEventListener('click', () => {
+                localStorage.removeItem('selectedUser');
+                sessionStorage.clear(); // Limpa timer para não continuar rodando sem logar
+                window.location.href = 'selecaoconta.html';
+            });
+
+        }); // Fim DOMContentLoaded
+
+
+        // ==========================================
+        // UTILITÁRIOS (MODAIS E AVISOS)
+        // ==========================================
+        function openModal(modalName) {
+            document.getElementById(`${modalName}-overlay`).classList.add('active');
+        }
+
+        function closeModal(modalName) {
+            document.getElementById(`${modalName}-overlay`).classList.remove('active');
+            if (modalName === 'modal-handle') {
+                document.getElementById('new-handle-input').style.borderColor = '#222226';
+            }
+        }
+
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+
+        let alertTimeout;
+        function showTopAlert(message, bgColor = '#f44336') {
+            const banner = document.getElementById('top-alert-banner');
+            const msgSpan = document.getElementById('alert-message');
+            
+            clearTimeout(alertTimeout); 
+            
+            msgSpan.textContent = message;
+            banner.style.backgroundColor = bgColor;
+            banner.classList.add('active');
+            
+            alertTimeout = setTimeout(() => {
+                banner.classList.remove('active');
+            }, 4000);
+        }
+
+    </script>
+</body>
+</html>

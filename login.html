@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Cadastro | GAMERADOFLIX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --dark: #040D12; --red: #C63C51; --light: #f3f3f3; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(rgba(4, 13, 18, 0.85), rgba(4, 13, 18, 0.85)), url('https://image.tmdb.org/t/p/original/mDeUmG9ca0p2uY686p799986as3.jpg');
+            background-size: cover; background-position: center;
+            height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0;
+        }
+        .auth-card {
+            background: rgba(4, 13, 18, 0.95);
+            padding: 50px; border-radius: 15px; width: 90%; max-width: 420px;
+            text-align: center; border-top: 4px solid var(--red);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+        h2 { color: var(--light); margin-bottom: 25px; font-weight: 700; }
+        .input-box { margin-bottom: 20px; text-align: left; }
+        .input-box label { color: var(--light); font-size: 0.8rem; display: block; margin-bottom: 8px; }
+        .input-box input {
+            width: 100%; padding: 12px; border-radius: 5px; border: 1px solid #333;
+            background: #111; color: white; outline: none; box-sizing: border-box;
+        }
+        .input-box input:focus { border-color: var(--red); }
+        .btn-submit {
+            width: 100%; padding: 14px; background: var(--red); border: none;
+            color: white; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.3s;
+            margin-top: 10px;
+        }
+        .btn-submit:hover { background: #a32f41; }
+        .guest-link { display: block; margin-top: 20px; color: #aaa; text-decoration: none; font-size: 0.9rem; cursor: pointer; }
+        .guest-link:hover { color: var(--light); text-decoration: underline; }
+        .switch-form { margin-top: 25px; color: #888; font-size: 0.85rem; }
+        .switch-form span { color: var(--red); cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <h2 id="formTitle">Entrar</h2>
+        <form id="authForm">
+            <div class="input-box" id="nameField" style="display: none;">
+                <label>Nome Completo</label>
+                <input type="text" id="userName" placeholder="Seu nome">
+            </div>
+            <div class="input-box">
+                <label>E-mail</label>
+                <input type="email" id="userEmail" placeholder="email@exemplo.com" required>
+            </div>
+            <div class="input-box">
+                <label>Senha</label>
+                <input type="password" id="userPass" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-submit" id="btnText">Entrar</button>
+        </form>
+        
+        <a onclick="entrarComoConvidado()" class="guest-link">Entrar como Convidado</a>
+        
+        <p class="switch-form" id="switchText">Novo no GAMERADOFLIX? <span onclick="toggleForm()">Cadastre-se agora.</span></p>
+    </div>
+
+    <script>
+        let isLogin = true;
+
+        function toggleForm() {
+            const title = document.getElementById('formTitle');
+            const btn = document.getElementById('btnText');
+            const nameField = document.getElementById('nameField');
+            const switchText = document.getElementById('switchText');
+            const nameInput = document.getElementById('userName');
+
+            isLogin = !isLogin;
+
+            if (!isLogin) {
+                title.innerText = 'Cadastrar';
+                btn.innerText = 'Criar Conta';
+                nameField.style.display = 'block';
+                nameInput.required = true;
+                switchText.innerHTML = 'Já tem uma conta? <span onclick="toggleForm()">Faça login.</span>';
+            } else {
+                title.innerText = 'Entrar';
+                btn.innerText = 'Entrar';
+                nameField.style.display = 'none';
+                nameInput.required = false;
+                switchText.innerHTML = 'Novo no GAMERADOFLIX? <span onclick="toggleForm()">Cadastre-se agora.</span>';
+            }
+        }
+
+        // Sistema de "Banco de Dados" com LocalStorage
+        document.getElementById('authForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Impede a página de recarregar
+            
+            const email = document.getElementById('userEmail').value;
+            
+            // Define o modo visitante como falso
+            localStorage.setItem('gameradoflix_isGuest', 'false');
+
+            if(!isLogin) {
+                // Modo Cadastro: Salva os dados permanentemente no navegador
+                const nome = document.getElementById('userName').value;
+                localStorage.setItem('gameradoflix_currentUserEmail', email);
+                localStorage.setItem('gameradoflix_currentUserName', nome);
+                alert('Conta criada com sucesso! Redirecionando...');
+            } else {
+                // Modo Login
+                localStorage.setItem('gameradoflix_currentUserEmail', email);
+            }
+
+// Salva que o usuário está logado
+localStorage.setItem('isLoggedIn', 'true');
+
+// Manda ele pra tela de escolher a conta
+window.location.href = 'selecaoconta.html';
+        });
+
+        function entrarComoConvidado() {
+            // Ativa a flag de convidado
+            localStorage.setItem('gameradoflix_isGuest', 'true');
+            window.location.href = 'conta.html';
+        }
+    </script>
+</body>
+</html>

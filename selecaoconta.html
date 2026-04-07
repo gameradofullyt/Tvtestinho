@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quem está assistindo? | GAMERADOFLIX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --dark: #040D12; --red: #C63C51; --light: #f3f3f3; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        h1 { font-weight: 500; font-size: 2.5rem; margin-bottom: 40px; text-align: center; }
+        
+        .profiles-container { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
+        
+        .profile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 150px;
+        }
+        .profile:hover .profile-img { border-color: var(--light); }
+        .profile:hover .profile-name { color: var(--light); }
+        
+        .profile-img {
+            width: 150px; height: 150px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 4px solid transparent;
+            transition: 0.3s;
+            background-color: #333;
+        }
+        
+        .profile-name { margin-top: 15px; color: #aaa; font-size: 1.2rem; transition: 0.3s; text-align: center; }
+
+        .add-profile-btn {
+            width: 150px; height: 150px;
+            border-radius: 10px;
+            border: 4px solid transparent;
+            background-color: #111;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 4rem; color: #888; cursor: pointer; transition: 0.3s;
+        }
+        .add-profile-wrapper { display: flex; flex-direction: column; align-items: center; }
+        .add-profile-btn:hover { background-color: var(--light); color: var(--dark); border-color: var(--light); }
+
+        .manage-btn {
+            margin-top: 60px; padding: 10px 30px;
+            background: transparent; border: 1px solid #888; color: #888;
+            font-size: 1rem; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 2px;
+        }
+        .manage-btn:hover { color: var(--light); border-color: var(--light); }
+        
+        .guest-warning { color: var(--red); margin-top: 20px; font-size: 0.9rem; display: none; }
+    </style>
+</head>
+<body>
+
+    <h1 id="pageTitle">Quem está assistindo?</h1>
+
+    <div class="profiles-container" id="profilesList">
+        </div>
+
+    <p class="guest-warning" id="guestWarning">Modo Convidado ativo. Alterações e novos perfis não serão salvos.</p>
+
+    <button class="manage-btn" onclick="sair()">Sair / Trocar Conta</button>
+
+    <script>
+        const isGuest = localStorage.getItem('gameradoflix_isGuest') === 'true';
+        const profilesList = document.getElementById('profilesList');
+        const guestWarning = document.getElementById('guestWarning');
+
+        // Carrega ou inicializa os perfis do "Banco de Dados" (LocalStorage)
+        let savedProfiles = JSON.parse(localStorage.getItem('gameradoflix_profiles')) || [
+            { name: "Gamerado", img: "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" }
+        ];
+
+        function renderProfiles() {
+            profilesList.innerHTML = ''; // Limpa a lista
+
+            if (isGuest) {
+                // Comportamento de Convidado: Mostra apenas um perfil padrão e não deixa criar outros
+                guestWarning.style.display = 'block';
+                profilesList.innerHTML = `
+                    <div class="profile" onclick="entrarNaPlataforma()">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" class="profile-img">
+                        <span class="profile-name">Convidado</span>
+                    </div>
+                `;
+            } else {
+                // Comportamento de Usuário Logado: Mostra os perfis salvos
+                savedProfiles.forEach((profile, index) => {
+                    profilesList.innerHTML += `
+                        <div class="profile" onclick="entrarNaPlataforma()">
+                            <img src="${profile.img}" class="profile-img">
+                            <span class="profile-name">${profile.name}</span>
+                        </div>
+                    `;
+                });
+
+                // Adiciona o botão de "Criar Perfil" se tiver menos de 4 perfis
+                if (savedProfiles.length < 4) {
+                    profilesList.innerHTML += `
+                        <div class="add-profile-wrapper">
+                            <div class="add-profile-btn" onclick="adicionarPerfil()">+</div>
+                            <span class="profile-name" style="margin-top: 15px;">Adicionar</span>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function adicionarPerfil() {
+            const novoNome = prompt("Digite o nome do novo perfil:");
+            if (!novoNome) return; // Cancela se não digitar nada
+
+            const urlFoto = prompt("Cole o link (URL) da imagem do perfil:\n(Deixe em branco para usar a foto padrão)");
+            
+            const fotoFinal = urlFoto ? urlFoto : "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png";
+
+            // Salva no banco de dados local
+            savedProfiles.push({ name: novoNome, img: fotoFinal });
+            localStorage.setItem('gameradoflix_profiles', JSON.stringify(savedProfiles));
+            
+            renderProfiles(); // Atualiza a tela
+        }
+        
+        // Salva o nome do perfil temporariamente na sessão
+sessionStorage.setItem('currentProfile', 'Nome Do Perfil Aqui');
+
+        function entrarNaPlataforma() {
+            // Aqui você redireciona para a página principal (index.html, GAMERADOTV, etc)
+            alert("Entrando no GAMERADOFLIX...");
+            window.location.href = 'index.html'; 
+        }
+
+        function sair() {
+            // Limpa apenas o status de login para exigir nova senha, mas mantém os perfis salvos
+            localStorage.removeItem('gameradoflix_currentUserEmail');
+            window.location.href = 'login.html';
+        }
+
+        // Inicia a renderização ao carregar a página
+        renderProfiles();
+    </script>
+
+</body>
+</html>
