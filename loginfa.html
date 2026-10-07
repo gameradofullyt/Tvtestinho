@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login & Cadastro | GAMERADOFLIX</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;700&display=swap" rel="stylesheet">
+
+    <!-- GOOGLE LOGIN -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- FACEBOOK SDK -->
+    <script>
+        window.fbAsyncInit = function () {
+            FB.init({
+                appId: '1374777304818660',
+                cookie: true,
+                xfbml: false,
+                version: 'v23.0'
+            });
+
+            FB.AppEvents.logPageView();
+        };
+
+        (function (d, s, id) {
+            var js,
+                fjs = d.getElementsByTagName(s)[0];
+
+            if (d.getElementById(id)) return;
+
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "https://connect.facebook.net/pt_BR/sdk.js";
+
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+    </script>
+
+    <style>
+        :root {
+            --dark: #040D12;
+            --red: #C63C51;
+            --light: #f3f3f3;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+
+            background:
+                linear-gradient(
+                    rgba(4, 13, 18, 0.85),
+                    rgba(4, 13, 18, 0.85)
+                ),
+                url('https://image.tmdb.org/t/p/original/mDeUmG9ca0p2uY686p799986as3.jpg');
+
+            background-size: cover;
+            background-position: center;
+
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            margin: 0;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: rgba(4, 13, 18, 0.95);
+
+            padding: 50px;
+
+            border-radius: 15px;
+
+            width: 100%;
+            max-width: 520px;
+
+            text-align: center;
+
+            border-top: 4px solid var(--red);
+
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        h2 {
+            color: var(--light);
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .input-box {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-box label {
+            color: var(--light);
+            font-size: 0.8rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .input-box input {
+            width: 100%;
+            padding: 12px;
+
+            border-radius: 5px;
+            border: 1px solid #333;
+
+            background: #111;
+            color: white;
+
+            outline: none;
+        }
+
+        .input-box input:focus {
+            border-color: var(--red);
+        }
+
+        .btn-submit {
+            width: 100%;
+
+            padding: 14px;
+
+            background: var(--red);
+
+            border: none;
+
+            color: white;
+
+            font-weight: bold;
+
+            border-radius: 5px;
+
+            cursor: pointer;
+
+            transition: 0.3s;
+
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background: #a32f41;
+        }
+
+        .guest-link {
+            display: block;
+
+            margin-top: 20px;
+
+            color: #aaa;
+
+            text-decoration: none;
+
+            font-size: 0.9rem;
+
+            cursor: pointer;
+        }
+
+        .guest-link:hover {
+            color: var(--light);
+            text-decoration: underline;
+        }
+
+        .switch-form {
+            margin-top: 25px;
+
+            color: #888;
+
+            font-size: 0.85rem;
+        }
+
+        .switch-form span {
+            color: var(--red);
+
+            cursor: pointer;
+
+            font-weight: bold;
+        }
+
+        .divider {
+            display: flex;
+
+            align-items: center;
+
+            text-align: center;
+
+            margin: 20px 0;
+
+            color: #888;
+
+            font-size: 0.9rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+
+            flex: 1;
+
+            border-bottom: 1px solid #333;
+        }
+
+        .divider:not(:empty)::before {
+            margin-right: 10px;
+        }
+
+        .divider:not(:empty)::after {
+            margin-left: 10px;
+        }
+
+        /* =========================================
+           BOTÕES SOCIAIS
+        ========================================= */
+
+        .social-buttons {
+            width: 100%;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 12px;
+        }
+
+        /* FACEBOOK */
+
+        #facebookLoginBtn {
+            width: 100%;
+            height: 52px;
+
+            border: none;
+
+            border-radius: 5px;
+
+            background: #1877F2;
+
+            color: white;
+
+            font-family: Arial, sans-serif;
+
+            font-size: 16px;
+
+            font-weight: 500;
+
+            cursor: pointer;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 12px;
+
+            transition: 0.2s;
+
+            padding: 0;
+        }
+
+        #facebookLoginBtn:hover {
+            background: #166fe5;
+        }
+
+        #facebookLoginBtn:active {
+            transform: scale(0.99);
+        }
+
+        .facebook-icon {
+            width: 28px;
+            height: 28px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            font-family: Arial, sans-serif;
+
+            font-size: 27px;
+
+            font-weight: bold;
+
+            line-height: 1;
+        }
+
+        /* GOOGLE */
+
+        .google-btn-container {
+            width: 100%;
+
+            height: 52px;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            overflow: hidden;
+        }
+
+        .google-btn-container .g_id_signin {
+            width: 100% !important;
+            height: 52px !important;
+
+            display: flex;
+
+            justify-content: center;
+        }
+
+        .google-btn-container iframe {
+            max-width: 100% !important;
+        }
+
+        /* LOADING */
+
+        .loading {
+            opacity: 0.7;
+
+            pointer-events: none;
+        }
+
+        @media (max-width: 600px) {
+
+            body {
+                padding: 10px;
+            }
+
+            .auth-card {
+                padding: 35px 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="auth-card">
+
+        <h2 id="formTitle">Entrar</h2>
+
+        <!-- FORMULÁRIO -->
+        <form id="authForm">
+
+            <div
+                class="input-box"
+                id="nameField"
+                style="display: none;"
+            >
+                <label>Nome Completo</label>
+
+                <input
+                    type="text"
+                    id="userName"
+                    placeholder="Seu nome"
+                >
+            </div>
+
+            <div class="input-box">
+
+                <label>E-mail</label>
+
+                <input
+                    type="email"
+                    id="userEmail"
+                    placeholder="email@exemplo.com"
+                    required
+                >
+
+            </div>
+
+            <div class="input-box">
+
+                <label>Senha</label>
+
+                <input
+                    type="password"
+                    id="userPass"
+                    placeholder="••••••••"
+                    required
+                >
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn-submit"
+                id="btnText"
+            >
+                Entrar
+            </button>
+
+        </form>
+
+        <div class="divider">
+            ou
+        </div>
+
+        <!-- BOTÕES SOCIAIS -->
+        <div class="social-buttons">
+
+            <!-- GOOGLE -->
+
+            <div
+                id="g_id_onload"
+                data-client_id="892335542975-ups3qufrrvkiduj91vrccetle6orl9ib.apps.googleusercontent.com"
+                data-context="signin"
+                data-ux_mode="popup"
+                data-callback="handleCredentialResponse"
+                data-auto_prompt="false">
+            </div>
+
+            <div class="google-btn-container">
+
+                <div
+                    class="g_id_signin"
+                    data-type="standard"
+                    data-shape="rectangular"
+                    data-theme="outline"
+                    data-text="signin_with"
+                    data-size="large"
+                    data-logo_alignment="left"
+                    data-width="400">
+                </div>
+
+            </div>
+
+
+            <!-- FACEBOOK -->
+
+            <button
+                type="button"
+                id="facebookLoginBtn"
+                onclick="loginComFacebook()"
+            >
+
+                <span class="facebook-icon">
+                    f
+                </span>
+
+                <span>
+                    Continuar com Facebook
+                </span>
+
+            </button>
+
+        </div>
+
+        <!-- CONVIDADO -->
+
+        <a
+            onclick="entrarComoConvidado()"
+            class="guest-link"
+        >
+            Entrar como Convidado
+        </a>
+
+        <!-- TROCAR LOGIN/CADASTRO -->
+
+        <p
+            class="switch-form"
+            id="switchText"
+        >
+            Novo no GAMERADOFLIX?
+            <span onclick="toggleForm()">
+                Cadastre-se agora.
+            </span>
+        </p>
+
+    </div>
+
+
+    <!-- =========================================
+         FIREBASE
+    ========================================= -->
+
+    <script type="module">
+
+        import {
+            initializeApp
+        }
+        from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+
+
+        import {
+            getFirestore,
+            doc,
+            setDoc
+        }
+        from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+
+        const firebaseConfig = {
+
+            apiKey:
+                "AIzaSyAj1UDDybDruWKDFsRD3cIUpy9iO2SmQIg",
+
+            authDomain:
+                "gamerado-login.firebaseapp.com",
+
+            projectId:
+                "gamerado-login",
+
+            storageBucket:
+                "gamerado-login.firebasestorage.app",
+
+            messagingSenderId:
+                "1039220154035",
+
+            appId:
+                "1:1039220154035:web:6400d19cf8906418645ac6",
+
+            measurementId:
+                "G-BY0ERERZPR"
+        };
+
+
+        const app = initializeApp(firebaseConfig);
+
+        const db = getFirestore(app);
+
+
+        /* =========================================
+           SALVAR USUÁRIO NO FIREBASE
+        ========================================= */
+
+        window.salvarNoBanco = async function (dados) {
+
+            try {
+
+                await setDoc(
+
+                    doc(
+                        db,
+                        "usuarios",
+                        dados.sub
+                    ),
+
+                    {
+
+                        nome: dados.name || "Usuário",
+
+                        email: dados.email || "",
+
+                        foto: dados.picture || "",
+
+                        pontos: 0,
+
+                        nivel: "Membro",
+
+                        provedor: dados.provedor || "google"
+
+                    },
+
+                    {
+                        merge: true
+                    }
+
+                );
+
+
+                console.log(
+                    "Usuário salvo no Firebase!"
+                );
+
+
+                localStorage.setItem(
+                    'gameradoflix_isGuest',
+                    'false'
+                );
+
+
+                localStorage.setItem(
+                    'gameradoflix_currentUserEmail',
+                    dados.email || ""
+                );
+
+
+                localStorage.setItem(
+                    'gameradoflix_currentUserName',
+                    dados.name || "Usuário"
+                );
+
+
+                localStorage.setItem(
+                    'gameradoflix_currentUserPhoto',
+                    dados.picture || ""
+                );
+
+
+                localStorage.setItem(
+                    'isLoggedIn',
+                    'true'
+                );
+
+
+                window.location.href =
+                    'selecaoconta.html';
+
+
+            } catch (e) {
+
+                console.error(
+                    "Erro ao salvar no Firebase:",
+                    e
+                );
+
+                alert(
+                    "Erro ao conectar no banco de dados. Tente novamente."
+                );
+
+            }
+
+        };
+
+    </script>
+
+
+    <!-- =========================================
+         FACEBOOK LOGIN
+    ========================================= -->
+
+    <script>
+
+        window.loginComFacebook = function () {
+
+            const btn =
+                document.getElementById(
+                    'facebookLoginBtn'
+                );
+
+
+            /* Evita clique antes do SDK carregar */
+
+            if (
+                typeof FB === 'undefined'
+            ) {
+
+                alert(
+                    'O Facebook ainda está carregando. Aguarde alguns segundos e tente novamente.'
+                );
+
+                return;
+
+            }
+
+
+            btn.classList.add('loading');
+
+            btn.innerHTML =
+                '<span>Entrando com Facebook...</span>';
+
+
+            FB.login(
+
+                function (response) {
+
+                    if (
+                        response.authResponse
+                    ) {
+
+                        console.log(
+                            'Login Facebook autorizado!'
+                        );
+
+
+                        const accessToken =
+                            response.authResponse
+                                .accessToken;
+
+
+                        /* Busca os dados do usuário */
+
+                        FB.api(
+
+                            '/me',
+
+                            {
+                                fields:
+                                    'id,name,email,picture.type(large)'
+                            },
+
+                            function (user) {
+
+                                console.log(
+                                    'Dados Facebook:',
+                                    user
+                                );
+
+
+                                if (
+                                    !user ||
+                                    user.error
+                                ) {
+
+                                    console.error(
+                                        user
+                                    );
+
+                                    restaurarBotaoFacebook();
+
+                                    alert(
+                                        'Não foi possível obter os dados da sua conta do Facebook.'
+                                    );
+
+                                    return;
+
+                                }
+
+
+                                const dadosFacebook = {
+
+                                    sub:
+                                        'facebook_' +
+                                        user.id,
+
+                                    name:
+                                        user.name ||
+                                        'Usuário Facebook',
+
+                                    email:
+                                        user.email ||
+                                        '',
+
+                                    picture:
+                                        user.picture &&
+                                        user.picture.data
+                                            ? user.picture.data.url
+                                            : '',
+
+                                    provedor:
+                                        'facebook'
+
+                                };
+
+
+                                /* Salva no Firebase */
+
+                                if (
+                                    typeof window.salvarNoBanco ===
+                                    'function'
+                                ) {
+
+                                    window.salvarNoBanco(
+                                        dadosFacebook
+                                    );
+
+                                } else {
+
+                                    console.error(
+                                        'Função salvarNoBanco não encontrada.'
+                                    );
+
+                                    restaurarBotaoFacebook();
+
+                                    alert(
+                                        'Erro ao conectar ao Firebase.'
+                                    );
+
+                                }
+
+                            }
+
+                        );
+
+                    } else {
+
+                        console.log(
+                            'Usuário cancelou o login do Facebook.'
+                        );
+
+                        restaurarBotaoFacebook();
+
+                    }
+
+                },
+
+                {
+                    scope:
+                        'public_profile,email'
+                }
+
+            );
+
+        };
+
+
+        function restaurarBotaoFacebook() {
+
+            const btn =
+                document.getElementById(
+                    'facebookLoginBtn'
+                );
+
+
+            btn.classList.remove(
+                'loading'
+            );
+
+
+            btn.innerHTML = `
+
+                <span class="facebook-icon">
+                    f
+                </span>
+
+                <span>
+                    Continuar com Facebook
+                </span>
+
+            `;
+
+        }
+
+    </script>
+
+
+    <!-- =========================================
+         FORMULÁRIO / GOOGLE / CONVIDADO
+    ========================================= -->
+
+    <script>
+
+        let isLogin = true;
+
+
+        /* =========================================
+           ALTERNAR LOGIN / CADASTRO
+        ========================================= */
+
+        function toggleForm() {
+
+            const title =
+                document.getElementById(
+                    'formTitle'
+                );
+
+            const btn =
+                document.getElementById(
+                    'btnText'
+                );
+
+            const nameField =
+                document.getElementById(
+                    'nameField'
+                );
+
+            const switchText =
+                document.getElementById(
+                    'switchText'
+                );
+
+            const nameInput =
+                document.getElementById(
+                    'userName'
+                );
+
+
+            isLogin = !isLogin;
+
+
+            if (!isLogin) {
+
+                title.innerText =
+                    'Cadastrar';
+
+                btn.innerText =
+                    'Criar Conta';
+
+                nameField.style.display =
+                    'block';
+
+                nameInput.required =
+                    true;
+
+                switchText.innerHTML =
+                    'Já tem uma conta? <span onclick="toggleForm()">Faça login.</span>';
+
+            } else {
+
+                title.innerText =
+                    'Entrar';
+
+                btn.innerText =
+                    'Entrar';
+
+                nameField.style.display =
+                    'none';
+
+                nameInput.required =
+                    false;
+
+                switchText.innerHTML =
+                    'Novo no GAMERADOFLIX? <span onclick="toggleForm()">Cadastre-se agora.</span>';
+
+            }
+
+        }
+
+
+        /* =========================================
+           LOGIN MANUAL
+        ========================================= */
+
+        document
+            .getElementById('authForm')
+            .addEventListener(
+                'subm

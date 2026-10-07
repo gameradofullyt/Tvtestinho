@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todos os Filmes | GAMERADOFLIX</title>
+    <style>
+        /* Estilos baseados no design do site */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000; /* Fundo preto */
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Barra de navegação do topo (Filtro e Pesquisa) */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #000000;
+            padding: 12px 15px;
+            font-size: 13px;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        /* Estilo do Select (Filtro) */
+        .filter-select {
+            background-color: #8b1c31; 
+            color: white;
+            border: none; 
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            outline: none;
+            transition: background-color 0.2s;
+        }
+        
+        .filter-select:hover {
+            background-color: #6a1324; 
+        }
+
+        .filter-select option {
+            background-color: #8b1c31; 
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Estilo da Barra de Pesquisa */
+        .search-input {
+            background-color: #1c2130;
+            color: white;
+            border: 1px solid #2a3145;
+            padding: 8px 12px;
+            border-radius: 4px;
+            outline: none;
+            width: 150px;
+            transition: width 0.3s ease, border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            width: 200px;
+            border-color: #8b1c31; 
+        }
+
+        .search-input::placeholder {
+            color: #8c92a5;
+        }
+
+        .page-indicator {
+            color: #8c92a5;
+            font-size: 12px;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        /* Grade de 3 colunas (940px) */
+        .grid-filmes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px; 
+            padding: 25px 15px;
+            max-width: 940px; 
+            margin: 0 auto;
+            min-height: 50vh;
+        }
+
+        /* Estilo individual de cada card de filme */
+        .filme {
+            position: relative;
+            background-color: transparent;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            min-width: 0; /* CORREÇÃO: Impede que o card estoure as 3 colunas */
+        }
+
+        .filme:hover {
+            transform: scale(1.03);
+        }
+
+        .filme img {
+            width: 100%;
+            aspect-ratio: 2 / 3; 
+            object-fit: cover;
+            display: block;
+            border-radius: 8px; 
+            border: 1px solid #2a2a2a; 
+        }
+
+        /* Tags de DUB, HD, CAM */
+        .tags {
+            display: none; 
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            gap: 5px;
+            z-index: 2;
+        }
+
+        .tag {
+            font-size: 10px;
+            font-weight: bold;
+            padding: 3px 6px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .tag.dub { background-color: #1ba1e2; color: #fff; }
+        .tag.leg { background-color: #2d89ef; color: #fff; }
+        .tag.qual { background-color: #000; color: #fff; border: 1px solid #444; }
+
+        /* Informações na base do card */
+        .card-info {
+            padding: 8px 2px 0 2px; 
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0; /* CORREÇÃO: Permite que o texto corte corretamente */
+        }
+
+        .card-info h4 {
+            margin: 0;
+            font-size: 14px; 
+            font-weight: normal;
+            color: #fff;
+            white-space: nowrap; 
+            overflow: hidden;
+            text-overflow: ellipsis; 
+            width: 100%;
+        }
+
+        .card-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px; 
+            width: 100%;
+        }
+        
+        .card-details span:first-child {
+            color: #66cc66; 
+            font-weight: normal;
+        }
+
+        .card-details span:last-child {
+            color: #d4af37; 
+            font-weight: normal;
+        }
+
+        /* Paginação no final da página */
+        .bottom-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 15px 50px;
+            max-width: 940px; 
+            margin: 0 auto;
+        }
+
+        /* Grupos de botões laterais */
+        .pagination-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        /* Botões Estilizados */
+        .btn-wine {
+            background-color: #8b1c31; 
+            color: white;
+            border: 1px solid #a3243c; 
+            padding: 8px 14px; 
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 11px; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .btn-wine:hover:not(:disabled) {
+            background-color: #a42139; 
+            border-color: #bd2a44;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .btn-wine:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-wine:disabled {
+            background-color: #1c2130;
+            border-color: #2a3145;
+            color: #6a7185;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        #btn-jump {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+
+        .jump-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .jump-menu {
+            position: absolute;
+            bottom: calc(100% + 12px); 
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background-color: #1a1f2e;
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.7);
+            display: flex;
+            gap: 8px;
+            border: 1px solid #2a3145;
+            z-index: 20;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .jump-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .jump-menu::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 10px;
+            height: 10px;
+            background-color: #1a1f2e;
+            border-right: 1px solid #2a3145;
+            border-bottom: 1px solid #2a3145;
+        }
+
+        .jump-menu input {
+            background-color: #0b0f19;
+            color: white;
+            border: 1px solid #2a3145;
+            padding: 8px;
+            border-radius: 4px;
+            width: 70px;
+            outline: none;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+
+        .jump-menu input:focus {
+            border-color: #8b1c31;
+        }
+
+        .jump-menu input::placeholder {
+            font-size: 11px;
+            font-weight: normal;
+            color: #6a7185;
+        }
+
+        .jump-menu button {
+            padding: 8px 12px;
+            width: auto;
+            height: auto;
+            position: relative;
+            z-index: 2; 
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="top-bar">
+        <select class="filter-select" id="filter-select">
+            <option value="todos">Gêneros</option>
+            <option value="acao">Ação</option>
+            <option value="romance">Romance</option>
+            <option value="terror">Terror</option>
+            <option value="ficcao">Ficção</option>
+            <option value="comedia">Comédia</option>
+            <option value="luta">Luta</option>
+            <option value="drama">Drama</option>
+            <option value="animal">Animais</option>
+            <option value="crime">Crime</option>
+            <option value="kid">Infantil</option>
+            <option value="anime">Animes</option>
+            <option value="erotico">Erotico</option>
+        </select>
+        
+        <span class="page-indicator" id="page-info">Pág 1 de 1</span>
+        
+        <input type="text" id="search-input" class="search-input" placeholder="Pesquisar...">
+    </header>
+
+    <main class="content">
+        <div class="grid-filmes" id="lista-filmes">
+
+            <script>
+                for(let i = 1; i <= 1; i++) {
+                    let generoAleatorio = ['acao', 'terror', 'ficcao'][Math.floor(Math.random() * 3)];
+                    
+                    document.write(``);
+                }
+            </script>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=Moana&url=https://ia903105.us.archive.org/7/items/moana.-2026.1080p.-camrip.-dublado.-v.-2.-official_202607/Moana.2026.1080p.CAMRip.Dublado.V.2.Official.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://i.imgur.com/miYcVfH.jpeg" alt="Capa">
+                <div class="card-info">
+                    <h4>Moana</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2026</span></div>
+                </div>
+            </div>
+
+          <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=A Sombra e a Escuridão&url=https://ia600508.us.archive.org/24/items/resident.-evil.-2026.1080p.-telesync.-multi.x-264-dks/Resident.Evil.2026.1080p.TELESYNC.MULTi.x264-DKS.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdsi_s_oeL6ct-vvYPSnly6d3hUTnxhiEqV6uyRbLJBK0JwJy0Z59Q_lI&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Resident Evil</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2026</span></div>
+                </div>
+          </div>
+
+          <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=Toy Story 5&url=https://ia600907.us.archive.org/34/items/planeta-hulk_202609/Planeta%20Hulk.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://i.imgur.com/10lSeLd.jpeg" alt="Capa">
+                <div class="card-info">
+                    <h4>Planeta Hulk</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2010</span></div>
+                </div>
+          </div>
+
+          <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=Toy Story 5&url=https://ia600909.us.archive.org/13/items/a-fera_2020/A%20Fera.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://i.imgur.com/wp4Fqdk.jpeg" alt="Capa">
+                <div class="card-info">
+                    <h4>A Fera</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2020</span></div>
+                </div>
+          </div>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=Toy Story 5&url=https://ia601807.us.archive.org/30/items/toy.-story.-5.2026.1080p.-webrip.-dublado/Toy.Story.5.2026.1080p.WEBRip.Dublado.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://i.imgur.com/QNqRj4I.jpeg" alt="Capa">
+                <div class="card-info">
+                    <h4>Toy Story 5</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2026</span></div>
+                </div>
+            </div>
+
+          <div class="filme" onclick="window.location.href='player.html?title=O Devorador de Ossos&url=https://ia600109.us.archive.org/23/items/venom_202607/Venom.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://i.imgur.com/vv43pcJ.png" alt="Capa">
+                <div class="card-info">
+                    <h4>O Devorador de Ossos</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2008</span></div>
+                </div>
+          </div>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=A Odisséia&url=https://ia601804.us.archive.org/9/items/a-odisseia-dub-2026-baixandoviatorrent.-com/A%20Odisseia%20Dub%202026%20-%20BAIXANDOVIATORRENT.COM.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://i.imgur.com/IatYaIv.jpeg" alt="Capa">
+                <div class="card-info">
+                    <h4>A Odisséia</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2026</span></div>
+                </div>
+            </div>
+
+          <div class="filme" onclick="window.location.href='player.html?title=Godzilla vs. Mechagodzilla&url=https://ia801401.us.archive.org/18/items/1974-godzilla-vs.-mecha-godzilla/%281974%29%20Godzilla%20vs.%20MechaGodzilla.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p5356_p_v8_aa.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Godzilla vs. Mechagodzilla</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>1974</span></div>
+                </div>
+          </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://ia600109.us.archive.org/23/items/venom_202607/Venom.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://i.imgur.com/0APSY0M.png" alt="Capa">
+                <div class="card-info">
+                    <h4>Venom</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>1999</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Cyberpunk Machinima&url=https://ia601509.us.archive.org/7/items/o-colecionador-de-corpos-2009-filmes-completos-de-suspense-dublado-pt-br-1080-p-hd/O%20Colecionador%20de%20Corpos%20%282009%29%20-%20Filmes%20completos%20de%20Suspense%20-%20Dublado%20PT-BR%281080P_HD%29.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img2.acsta.net/pictures/15/09/11/18/22/526627.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>O Colecionador de Corpos</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2009</span></div>
+                </div>
+            </div>
+
+          <div class="filme" onclick="window.location.href='player.html?title=A Criatura Mutante&url=https://ia601008.us.archive.org/18/items/a-criatura-mutante.-2020.1080p.-web-dl.x-264.-dual.-2.0/A%20Criatura%20Mutante.2020.1080p.WEB-DL.x264.DUAL.2.0.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2f-JqURELksO0M0x_JIqxOcpf8fxO31iihPW64uX6Jbzf8tYEXIAoI3Tt&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>A Criatura Mutante</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2020</span></div>
+                </div>
+          </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Michael&url=https://ia600603.us.archive.org/31/items/michael_202607/Michael.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://m.media-amazon.com/images/M/MV5BNzllNmRlN2EtMDQyOC00ODJjLTg4OWQtZDNmNGU3YzlkNjc1XkEyXkFqcGc@._V1_.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Michael</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2026</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=Naufrágio: O Pesadelo do Costa Concordia&url=https://ia601608.us.archive.org/31/items/naufragio-o-pesadelo-do-costa-concordia/Naufr%C3%A1gio%20O%20Pesadelo%20do%20Costa%20Concordia.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://static.wikia.nocookie.net/dublagem/images/1/13/Costa_Concordia.png/revision/latest/scale-to-width-down/1200?cb=20260711182804&path-prefix=pt-br" alt="Capa">
+                <div class="card-info">
+                    <h4>Naufrágio: O Pesadelo do Costa Concordia</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2026</span></div>
+                </div>
+            </div>
+
+          <div class="filme" onclick="window.location.href='player.html?title=Ano Novo, Morte Nova&url=https://ia600109.us.archive.org/23/items/venom_202607/Venom.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRGYPjtwBo7O1J_iZufrWhw5oRlC8o_eClo5G4cQqnC4vhPdvM1" alt="Capa">
+                <div class="card-info">
+                    <h4>Ano Novo, Morte Nova</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2018</span></div>
+                </div>
+          </div>
+
+          <div class="filme" onclick="window.location.href='player.html?title=Pacto Secreto&url=https://ia600109.us.archive.org/23/items/venom_202607/Venom.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://m.media-amazon.com/images/S/pv-target-images/56726582c03ce934eb51c3535030c3773a86cecbad4fd1fe2a66c7ab0cc8bee8.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Pacto Secreto</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2009</span></div>
+                </div>
+          </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Avalanche de Tubarão&url=https://ia600604.us.archive.org/14/items/avalanche-de-tubaroes-filme-completo/Avalanche%20de%20Tubar%C3%B5es%20-%20Filme%20Completo%20Dublado%20HD%28360P%29.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img3.acsta.net/c_310_420/pictures/210/029/21002939_20130502175518019.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Avalanche de Tubarões</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2014</span></div>
+                </div>
+            </div>
+
+          <div class="filme" onclick="window.location.href='player.html?title=Amigas para Sempre&url=https://ia601408.us.archive.org/28/items/amigas-para-sempre.-2024.1080p.-web-dl.x-264.-dual.-5.1/Amigas%20para%20Sempre.2024.1080p.WEB-DL.x264.DUAL.5.1.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTBlZoRy3ly4fzAwE-QUXNOpHUheZvs_fkaQesQk-83FlT2-Xna" alt="Capa">
+                <div class="card-info">
+                    <h4>Amigas para Sempre</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2024</span></div>
+                </div>
+          </div>
+
+          <div class="filme" onclick="window.location.href='player.html?title=As Cores do Mal - Preto&url=https://ia600603.us.archive.org/17/items/as-cores-do-mal-preto-2026-web-dl-1080p-x-264-dual-5.1/As%20Cores%20do%20Mal%20-%20Preto%202026%20WEB-DL%201080p%20x264%20DUAL%205.1.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img3.acsta.net/img/0d/4c/0d4c6351d025775c010d0a2f16ed66f6.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>As Cores do Mal - Preto</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2026</span></div>
+                </div>
+          </div>
+
+          <div class="filme" onclick="window.location.href='player.html?title=Traffik: Liberdade Roubada&url=https://ia600109.us.archive.org/23/items/venom_202607/Venom.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://m.media-amazon.com/images/S/pv-target-images/da0562105ba20c8538075c4e3ad8dbe9b27076d79530159520accc6396de5ca5.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Traffik: Liberdade Roubada</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2018</span></div>
+                </div>
+          </div>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=A Sombra e a Escuridão&url=https://ia600103.us.archive.org/33/items/obsessao-1/Obsess%C3%A3o_1.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-5tka8vvQkGLcSYOEhQmTgVRAsMSYZaIw8VJLFxBGu1NCgGblb_cuhtk&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Obsessão</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2025</span></div>
+                </div>
+            </div>
+
+          <div class="filme" onclick="window.location.href='player.html?title=Mayday&url=https://ia600905.us.archive.org/2/items/mayday-2026-web-dl-1080p-x-264-dual-5.1/Mayday%202026%20WEB-DL%201080p%20x264%20DUAL%205.1.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://i.imgur.com/bSKFORT.png" alt="Capa">
+                <div class="card-info">
+                    <h4>Mayday</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2026</span></div>
+                </div>
+          </div>
+
+          <div class="filme" onclick="window.location.href='player.html?title=Sabor do Desejo&url=https://ia600501.us.archive.org/33/items/sabor-do-desejo.-2021.1080p.-web-dl.x-264.-dual.-5.1/Sabor%20do%20Desejo.2021.1080p.WEB-DL.x264.DUAL.5.1.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://i.imgur.com/pc6fpH4.jpeg" alt="Capa">
+                <div class="card-info">
+                    <h4>Sabor do Desejo</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2021</span></div>
+                </div>
+          </div>
+
+          <div class="filme" onclick="window.location.href='player.html?title=Traffic&url=https://ia600109.us.archive.org/23/items/venom_202607/Venom.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://cinema-em-cena.nyc3.cdn.digitaloceanspaces.com/reviews/1214/fkk54pyjkeQJB03wBybpisG1RCB.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Traffic</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2000</span></div>
+                </div>
+          </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Backrooms&url=https://ia800506.us.archive.org/11/items/backrooms_202607/Backrooms.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_XQ8x9K4P_1CCK65MDiHcr8C8AwIbbUhBe1m6PNBDsh8W_03-5HiEJzOO&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Backrooms: Um Não Lugar</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2026</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=O Uivo&url=https://ia903206.us.archive.org/10/items/a.-sombra.e.a.-escuridao.-1996.-brrip.-1080p/A.Sombra.e.a.Escuridao.1996.BRRip.1080p.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://br.web.img3.acsta.net/img/09/2c/092c6cb39deadf1ed28da1a85093aef5.PNG" alt="Capa">
+                <div class="card-info">
+                    <h4>O Uivo</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2015</span></div>
+                </div>
+            </div>
+
+          <div class="filme" onclick="window.location.href='player.html?title=Vertigem&url=https://ia600109.us.archive.org/23/items/venom_202607/Venom.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://m.media-amazon.com/images/S/pv-target-images/f0630c4a7a8d169bfeacd0351cd9441617e5997a11a37a7172abaa1743c37354.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Vertigem</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2009</span></div>
+                </div>
+          </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=A Fera do Pântano&url=https://ia601405.us.archive.org/16/items/hungry_202607/hungry.mp4'">
+                <div class="tags"><span class="tag dub">LEG</span><span class="tag qual">HD</span></div>
+                <img src="https://i.imgur.com/pTZ1u5J.png" alt="Capa">
+                <div class="card-info">
+                    <h4>A Fera do Pântano</h4>
+                    <div class="card-details"><span>FILME | LEG</span><span>1999</span></div>
+                </div>
+            </div>
+            
+            <div class="filme" data-genero="acao" onclick="window.location.href='player.html?title=Violência Aleatória&url=https://ia600109.us.archive.org/14/items/violencia-aleatoria/Viol%C3%AAncia%20Aleat%C3%B3ria.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://m.media-amazon.com/images/S/pv-target-images/fb8bf2246ede0802a12cebb75d9b16139d862c6cbaf973e7adc699083b16b4ec.jpg" alt="Capa">
+                <div class="card-info">
+                    <h4>Violência Aleatória</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2019</span></div>
+                </div>
+            </div>
+
+          <div class="filme" onclick="window.location.href='player.html?title=Sem Saída&url=https://ia600109.us.archive.org/23/items/venom_202607/Venom.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://i.imgur.com/qaDdN31.png" alt="Capa">
+                <div class="card-info">
+                    <h4>Sem Saída</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2008</span></div>
+                </div>
+          </div>
+            
+            <div class="filme" onclick="window.location.href='player.html?title=Uma História de Amor e Fúria&url=https://ia600503.us.archive.org/10/items/uma-historia-de-amor-e-furia/Uma%20Hist%C3%B3ria%20de%20Amor%20e%20F%C3%BAria.mp4'">
+                <div class="tags"><span class="tag dub">DUB</span><span class="tag qual">HD</span></div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1zIbAise9UBBVP9Y6eA98DBHdmlWiA2VeEkl0nE6bsaDDYdj0JSPm9VY&s=10" alt="Capa">
+                <div class="card-info">
+                    <h4>Uma História de Amor e Fúria</h4>
+                    <div class="card-details"><span>FILME | DUB</span><span>2013</span></div>
+                </div>
+            </div>
+
+        </div>
+
+      <div class="bottom-pagination" id="pagination-controls">
+            <!-- Grupo da Esquerda (Primeira e Anterior) -->
+            <div class="pagination-group">
+                <button class="btn-wine" id="btn-first" onclick="irParaPrimeiraPagina()" title="Ir para Página 1">« Pág 1</button>
+                <button class="btn-wine" id="btn-prev" onclick="voltarPagina()" title="Página Anterior">‹ Ant</button>
+            </div>
+
+            <!-- Botão Central (Menu de Salto - Quadrado) -->
+            <div class="jump-container">
+                <button class="btn-wine" id="btn-jump" onclick="toggleJumpMenu()" title="Pular para página específicas">🔎</button>
+                <div id="jump-menu" class="jump-menu">
+                    <input type="number" id="jump-input" placeholder="Nº pág" min="1" onkeypress="verificarEnter(event)">
+                    <button class="btn-wine" onclick="irParaPaginaDigitada()">Ir</button>
+                </div>
+            </div>
+
+            <!-- Grupo da Direita (Próxima e Última) -->
+            <div class="pagination-group">
+                <button class="btn-wine" id="btn-next" onclick="avancarPagina()" title="Próxima Página">Próx ›</button>
+                <button class="btn-wine" id="btn-last" onclick="irParaUltimaPagina()" title="Ir para Última Página">Última »</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const enableRandomOrder = false;
+        const filmesPorPagina = 30;
+        
+        let todosFilmes = [];
+        let filmesAtuais = [];
+        let paginaAtual = 1;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const container = document.getElementById("lista-filmes");
+            let elementos = Array.from(document.querySelectorAll(".filme"));
+
+            // --- INTEGRACAO DETALHES ---
+            elementos.forEach(el => {
+                const oldOnclick = el.getAttribute('onclick');
+                if (oldOnclick && oldOnclick.includes('url=')) {
+                    const urlMatch = oldOnclick.match(/url=([^']+)/);
+                    const mediaUrl = urlMatch ? urlMatch[1] : '';
+                    
+                    el.removeAttribute('onclick');
+                    
+                    el.addEventListener('click', function() {
+                        const title = this.querySelector('h4').innerText;
+                        const cover = this.querySelector('img').src;
+                        const detailsSpans = this.querySelectorAll('.card-details span');
+                        const year = detailsSpans.length > 1 ? detailsSpans[1].innerText : '2024';
+                        const genre = this.getAttribute('data-genero') || 'Ação';
+                        
+                        const mediaData = {
+                            title: title,
+                            url: mediaUrl,
+                            cover: cover,
+                            banner: cover,
+                            year: year,
+                            genre: genre,
+                            type: 'movie', 
+                            seriesInfo: { synopsis: "Prepare-se para muita emoção em " + title + ". Uma aventura imperdível do começo ao fim!" }
+                        };
+                        sessionStorage.setItem('currentMediaData', JSON.stringify(mediaData));
+                        window.location.href = 'detalhes.html';
+                    });
+                }
+            });
+
+            if (enableRandomOrder) {
+                for (let i = elementos.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [elementos[i], elementos[j]] = [elementos[j], elementos[i]];
+                }
+                elementos.forEach(el => container.appendChild(el));
+            }
+
+            todosFilmes = elementos;
+            filmesAtuais = [...todosFilmes];
+            atualizarVisualizacao();
+
+            document.addEventListener("click", function(event) {
+                const jumpContainer = document.querySelector(".jump-container");
+                const jumpMenu = document.getElementById("jump-menu");
+                if (!jumpContainer.contains(event.target)) {
+                    jumpMenu.classList.remove("show");
+                }
+            });
+        });
+
+        function atualizarVisualizacao() {
+            const totalPaginas = Math.ceil(filmesAtuais.length / filmesPorPagina) || 1;
+            
+            document.getElementById("page-info").innerText = `Pág ${paginaAtual} de ${totalPaginas}`;
+            
+            document.getElementById("btn-first").disabled = paginaAtual <= 1;
+            document.getElementById("btn-prev").disabled = paginaAtual <= 1;
+            
+            document.getElementById("btn-next").disabled = paginaAtual >= totalPaginas;
+            document.getElementById("btn-last").disabled = paginaAtual >= totalPaginas;
+
+            todosFilmes.forEach(f => f.classList.add("hidden"));
+
+            let inicio = (paginaAtual - 1) * filmesPorPagina;
+            let fim = inicio + filmesPorPagina;
+
+            for (let i = inicio; i < fim && i < filmesAtuais.length; i++) {
+                filmesAtuais[i].classList.remove("hidden");
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function avancarPagina() {
+            const totalPaginas = Math.ceil(filmesAtuais.length / filmesPorPagina);
+            if (paginaAtual < totalPaginas) {
+                paginaAtual++;
+                atualizarVisualizacao();
+            }
+        }
+
+        function voltarPagina() {
+            if (paginaAtual > 1) {
+                paginaAtual--;
+                atualizarVisualizacao();
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function irParaPrimeiraPagina() {
+            if (paginaAtual > 1) {
+                paginaAtual = 1;
+                atualizarVisualizacao();
+            }
+        }
+
+        function irParaUltimaPagina() {
+            const totalPaginas = Math.ceil(filmesAtuais.length / filmesPorPagina);
+            if (paginaAtual < totalPaginas) {
+                paginaAtual = totalPaginas;
+                atualizarVisualizacao();
+            }
+        }
+
+        function toggleJumpMenu() {
+            const menu = document.getElementById("jump-menu");
+            menu.classList.toggle("show");
+            if (menu.classList.contains("show")) {
+                document.getElementById("jump-input").focus();
+            }
+        }
+
+        function verificarEnter(event) {
+            if (event.key === "Enter") {
+                irParaPaginaDigitada();
+            }
+        }
+
+        function irParaPaginaDigitada() {
+            const totalPaginas = Math.ceil(filmesAtuais.length / filmesPorPagina) || 1;
+            const input = document.getElementById("jump-input");
+            const numPagina = parseInt(input.value);
+
+            if (!isNaN(numPagina) && numPagina >= 1 && numPagina <= totalPaginas) {
+                paginaAtual = numPagina;
+                atualizarVisualizacao();
+                document.getElementById("jump-menu").classList.remove("show");
+                input.value = "";
+            } else {
+                alert(`Por favor, insira um número válido entre 1 e ${totalPaginas}.`);
+                input.focus();
+            }
+        }
+
+        function aplicarFiltrosESearch() {
+            let termo = document.getElementById("search-input").value.toLowerCase();
+            let generoSelecionado = document.getElementById("filter-select").value;
+            let controlesPaginacao = document.getElementById("pagination-controls");
+
+            filmesAtuais = todosFilmes.filter(filme => {
+                let titulo = filme.querySelector("h4").innerText.toLowerCase();
+                let generoFilme = filme.getAttribute("data-genero") || "";
+                
+                let combinaBusca = titulo.includes(termo);
+                let combinaGenero = (generoSelecionado === "todos" || generoFilme === generoSelecionado);
+
+                return combinaBusca && combinaGenero;
+            });
+
+            if (termo.length > 0) {
+                controlesPaginacao.style.display = "none";
+                document.getElementById("page-info").innerText = "Buscando...";
+                
+                todosFilmes.forEach(f => f.classList.add("hidden"));
+                filmesAtuais.forEach(f => f.classList.remove("hidden"));
+                
+                let resultados = filmesAtuais.length;
+                document.getElementById("page-info").innerText = resultados === 0 ? "Nada encontrado" : `${resultados} resultado(s)`;
+            } else {
+                controlesPaginacao.style.display = "flex";
+                paginaAtual = 1;
+                atualizarVisualizacao();
+            }
+        }
+
+        document.getElementById("search-input").addEventListener("keyup", aplicarFiltrosESearch);
+        document.getElementById("filter-select").addEventListener("change", aplicarFiltrosESearch);
+
+    </script>
+</body>
+</html>
